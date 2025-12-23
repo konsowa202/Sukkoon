@@ -4,14 +4,38 @@
 
 ### 1️⃣ رفع على GitHub
 
+#### ⚠️ حل مشكلة "You must verify your email address"
+
+إذا ظهرت رسالة الخطأ:
+```
+remote: You must verify your email address.
+fatal: unable to access '...': The requested URL returned error: 403
+```
+
+**الحل:**
+1. اذهب إلى: https://github.com/settings/emails
+2. تحقق من صندوق الوارد (البريد الإلكتروني المستخدم في GitHub)
+3. افتح رسالة التحقق من GitHub
+4. اضغط على رابط التحقق
+5. بعد التحقق، حاول مرة أخرى:
+   ```bash
+   git push -u origin main
+   ```
+
+#### خطوات الرفع:
+
 ```bash
 git init
 git add .
 git commit -m "Initial commit"
 git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
+git remote add origin https://github.com/konsowa202/Sukkoon.git
 git push -u origin main
 ```
+
+**ملاحظة:** إذا كان Repository موجود بالفعل على GitHub، قد تحتاج إلى:
+- إما حذف Repository القديم وإنشاء واحد جديد
+- أو استخدام `git push -f origin main` (⚠️ احذر: هذا سيحذف التاريخ القديم)
 
 ### 2️⃣ النشر على Vercel
 
