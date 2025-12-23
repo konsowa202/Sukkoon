@@ -57,6 +57,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (typeof window !== 'undefined') {
       try {
         const storedUser = localStorage.getItem("sukoon_user")
+        const storedToken = localStorage.getItem("sukoon_token")
+        
+        // Sync cookie with localStorage token
+        if (storedToken) {
+          setCookie('sukoon_token', storedToken, 7)
+        }
+        
         if (storedUser) {
           const parsedUser = JSON.parse(storedUser)
           // Only update if user actually changed to avoid unnecessary re-renders
