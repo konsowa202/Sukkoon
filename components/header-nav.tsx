@@ -240,7 +240,14 @@ export function HeaderNav({ showAuth = true }: HeaderNavProps) {
                 </div>
               </div>
 
-              <div className="p-6 border-t bg-muted/30">
+              <div className="p-6 border-t bg-muted/30 space-y-3">
+                <Button variant="outline" className="w-full justify-between" onClick={toggleTheme}>
+                  <div className="flex items-center gap-2">
+                    {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                    <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground uppercase">{theme}</span>
+                </Button>
                 <Button variant="outline" className="w-full justify-between" onClick={toggleLanguage}>
                   <div className="flex items-center gap-2">
                     <Languages className="w-4 h-4" />

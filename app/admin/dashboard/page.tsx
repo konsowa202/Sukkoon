@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { DollarSign, Users, UserPlus, LogOut, Check, X, Edit, Trash2, Plus, Search, FileText, MessageCircle, Copy, Key, UserCheck, ShieldAlert, Phone, MapPin, Globe, CreditCard } from "lucide-react"
+import { DollarSign, Users, UserPlus, LogOut, Check, X, Edit, Trash2, Plus, Search, FileText, MessageCircle, Copy, Key, UserCheck, ShieldAlert, Phone, MapPin, Globe, CreditCard, Gift } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -28,12 +28,13 @@ export default function AdminDashboard() {
   const [patients, setPatients] = useState<any[]>([])
   const [cases, setCases] = useState<any[]>([])
   const [topics, setTopics] = useState<any[]>([])
+  const [promoCodes, setPromoCodes] = useState<any[]>([])
   const [stats, setStats] = useState({ totalDoctors: 0, totalPatients: 0, activeCases: 0, revenue: 0 })
   const [loading, setLoading] = useState(true)
 
   const [selectedEntity, setSelectedEntity] = useState<any>(null)
-  const [dialogType, setDialogType] = useState<"view" | "edit" | "delete" | "add" | null>(null)
-  const [entityType, setEntityType] = useState<"doctor" | "patient" | "case" | "topic" | null>(null)
+  const [dialogType, setDialogType] = useState<"view" | "edit" | "delete" | "add" | "promo" | null>(null)
+  const [entityType, setEntityType] = useState<"doctor" | "patient" | "case" | "topic" | "promo" | null>(null)
   const [activeChat, setActiveChat] = useState<any>(null)
   const { toast } = useToast()
 
@@ -55,20 +56,22 @@ export default function AdminDashboard() {
       }
 
       // Fetch all needed data
-      const [pendingRes, doctorsRes, patientsRes, appointmentsRes, paymentsRes] = await Promise.all([
+      const [pendingRes, doctorsRes, patientsRes, appointmentsRes, paymentsRes, promoRes] = await Promise.all([
         fetch('/api/doctors?verified=false', { headers }),
         fetch('/api/doctors', { headers }),
         fetch('/api/users?role=patient', { headers }),
         fetch('/api/appointments', { headers }),
-        fetch('/api/payments', { headers })
+        fetch('/api/payments', { headers }),
+        fetch('/api/promo-codes', { headers })
       ])
 
-      const [pendingData, doctorsData, patientsData, appointmentsData, paymentsData] = await Promise.all([
+      const [pendingData, doctorsData, patientsData, appointmentsData, paymentsData, promoData] = await Promise.all([
         pendingRes.ok ? pendingRes.json() : [],
         doctorsRes.ok ? doctorsRes.json() : [],
         patientsRes.ok ? patientsRes.json() : [],
         appointmentsRes.ok ? appointmentsRes.json() : [],
-        paymentsRes.ok ? paymentsRes.json() : []
+        paymentsRes.ok ? paymentsRes.json() : [],
+        promoRes.ok ? promoRes.json() : []
       ])
 
       setPendingDoctors(pendingData.map((d: any) => ({
@@ -81,6 +84,7 @@ export default function AdminDashboard() {
       })))
 
       setDoctors(doctorsData)
+      setPromoCodes(promoData)
 
       setPatients(patientsData.map((u: any) => ({
         id: u.id,
@@ -208,13 +212,13 @@ export default function AdminDashboard() {
     setPendingDoctors(pendingDoctors.filter(d => d.id !== id))
   }
 
-  const handleViewEntity = (entity: any, type: "doctor" | "patient" | "case" | "topic") => {
+  const handleViewEntity = (entity: any, type: "doctor" | "patient" | "case" | "topic" | "promo") => {
     setSelectedEntity(entity)
     setEntityType(type)
     setDialogType("view")
   }
 
-  const handleEditEntity = (entity: any, type: "doctor" | "patient" | "case" | "topic") => {
+  const handleEditEntity = (entity: any, type: "doctor" | "patient" | "case" | "topic" | "promo") => {
     setSelectedEntity(entity)
     setFormData({
       name: entity.name,
@@ -235,7 +239,7 @@ export default function AdminDashboard() {
     setDialogType("edit")
   }
 
-  const handleDeleteEntity = (entity: any, type: "doctor" | "patient" | "case" | "topic") => {
+  const handleDeleteEntity = (entity: any, type: "doctor" | "patient" | "case" | "topic" | "promo") => {
     setSelectedEntity(entity)
     setEntityType(type)
     setDialogType("delete")
@@ -292,6 +296,7 @@ export default function AdminDashboard() {
       if (entityType === 'doctor') url = `/api/doctors/${selectedEntity.id}`
       else if (entityType === 'patient') url = `/api/users/${selectedEntity.id}`
       else if (entityType === 'case') url = `/api/appointments/${selectedEntity.id}`
+      else if (entityType === 'promo') url = `/api/promo-codes/${selectedEntity.id}`
 
       if (!url) {
         toast({ variant: "destructive", title: "Wait", description: "Delete not available for this type yet" })
@@ -473,6 +478,7 @@ export default function AdminDashboard() {
                   <span className="absolute -top-1 -right-1 w-2 h-2 bg-destructive rounded-full" />
                 )}
               </TabsTrigger>
+              <TabsTrigger value="promo" className="py-2">Promo Codes</TabsTrigger>
             </TabsList>
 
             {/* Pending Doctor Approvals */}
@@ -579,6 +585,14 @@ export default function AdminDashboard() {
                             <div className="flex justify-end gap-2">
                               <Button size="sm" variant="ghost" title="Login as Doctor" onClick={() => handleImpersonate(doctor.userId || doctor.user_id)}>
                                 <UserCheck className="w-4 h-4 text-primary" />
+                              </Button>
+                              <Button size="sm" variant="ghost" title="Generate Free Session Code" onClick={() => {
+                                const random = 'FREE-' + Math.random().toString(36).substring(7).toUpperCase()
+                                setFormData({ code: random, discount_percent: 100, doctor_id: doctor.id, max_uses: 1 })
+                                setEntityType('promo')
+                                setDialogType('promo')
+                              }}>
+                                <Gift className="w-4 h-4 text-orange-500" />
                               </Button>
                               <Button size="sm" variant="ghost" onClick={() => handleViewEntity(doctor, "doctor")}>
                                 View
@@ -814,6 +828,58 @@ export default function AdminDashboard() {
                   ))}
                 </div>
               )}
+            </TabsContent>
+
+            <TabsContent value="promo" className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold">Promo Codes</h2>
+                <Button onClick={() => {
+                  setFormData({ discount_percent: 25, max_uses: 100 })
+                  setEntityType('promo')
+                  setDialogType('promo')
+                }}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  New Promo Code
+                </Button>
+              </div>
+              <Card>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="border-b border-border">
+                      <tr>
+                        <th className="text-left p-4 font-semibold">Code</th>
+                        <th className="text-left p-4 font-semibold">Discount</th>
+                        <th className="text-left p-4 font-semibold">Restrictions</th>
+                        <th className="text-left p-4 font-semibold">Usage</th>
+                        <th className="text-left p-4 font-semibold">Status</th>
+                        <th className="text-right p-4 font-semibold">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {promoCodes.map((promo) => (
+                        <tr key={promo.id} className="border-b border-border">
+                          <td className="p-4 font-bold">{promo.code}</td>
+                          <td className="p-4">{promo.discount_percent}% OFF</td>
+                          <td className="p-4 text-sm">
+                            {promo.doctor_id ? `Only for Dr. ${promo.doctor?.name}` : "All Doctors"}
+                          </td>
+                          <td className="p-4 text-sm">{promo.current_uses} / {promo.max_uses}</td>
+                          <td className="p-4">
+                            <Badge variant={promo.is_active ? "default" : "secondary"}>
+                              {promo.is_active ? "Active" : "Disabled"}
+                            </Badge>
+                          </td>
+                          <td className="p-4 text-right">
+                            <Button size="sm" variant="ghost" onClick={() => handleDeleteEntity(promo, "promo")}>
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
             </TabsContent>
           </Tabs>
         </div>

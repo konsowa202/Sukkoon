@@ -47,8 +47,14 @@ function SignupPageContent() {
 
     const success = await register(email, password, name, selectedRole, phone)
 
-    if (!success) {
-      setError("Email already exists. Please use a different email or login.")
+    if (success) {
+      // Small delay to ensure cookies are set
+      setTimeout(() => {
+        const dashboardPath = selectedRole === "doctor" ? "/doctor/dashboard" : "/patient/dashboard"
+        window.location.href = dashboardPath
+      }, 500)
+    } else {
+      setError("Email or Phone already exists. Please use a different value or login.")
       setLoading(false)
     }
   }

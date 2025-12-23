@@ -26,6 +26,12 @@ export default function PaymentPage() {
   const [error, setError] = useState<string | null>(null)
   const [appointment, setAppointment] = useState<any>(null)
   const [amount, setAmount] = useState<number>(0)
+  const [originalAmount, setOriginalAmount] = useState<number>(0)
+  const [promoCode, setPromoCode] = useState("")
+  const [appliedPromoId, setAppliedPromoId] = useState<string | null>(null)
+  const [discountAmount, setDiscountAmount] = useState(0)
+  const [promoError, setPromoError] = useState<string | null>(null)
+  const [applyingPromo, setApplyingPromo] = useState(false)
 
   useEffect(() => {
     fetchAppointment()
@@ -49,7 +55,9 @@ export default function PaymentPage() {
           const doctorResponse = await fetch(`/api/doctors/${apt.doctorId}`)
           if (doctorResponse.ok) {
             const doctor = await doctorResponse.json()
-            setAmount(apt.type === 'online' ? doctor.priceOnline : doctor.priceOffline)
+            const basePrice = apt.type === 'online' ? doctor.priceOnline : doctor.priceOffline
+            setAmount(basePrice)
+            setOriginalAmount(basePrice)
           }
         }
       }
@@ -115,6 +123,37 @@ export default function PaymentPage() {
     }
   }
 
+  const handleApplyPromo = async () => {
+    if (!promoCode.trim()) return
+    setApplyingPromo(true)
+    setPromoError(null)
+    try {
+      const token = localStorage.getItem('sukoon_token')
+      const response = await fetch('/api/promo-codes/validate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
+        },
+        body: JSON.stringify({ code: promoCode, appointmentId })
+      })
+
+      const data = await response.json()
+      if (response.ok) {
+        const discount = Math.round((originalAmount * data.discount_percent) / 100)
+        setDiscountAmount(discount)
+        setAmount(originalAmount - discount)
+        setAppliedPromoId(data.id)
+      } else {
+        setPromoError(data.error)
+      }
+    } catch (err) {
+      setPromoError('Failed to validate promo code')
+    } finally {
+      setApplyingPromo(false)
+    }
+  }
+
   const handleSubmit = async () => {
     if (!selectedMethod) {
       setError('Please select a payment method')
@@ -161,7 +200,10 @@ export default function PaymentPage() {
           appointmentId,
           amount,
           method: selectedMethod,
-          proofImageUrl: finalProofUrl
+          proofImageUrl: finalProofUrl,
+          promo_code_id: appliedPromoId,
+          original_amount: originalAmount,
+          discount_amount: discountAmount
         })
       })
 
@@ -235,9 +277,36 @@ export default function PaymentPage() {
               </p>
               <p className="text-lg font-bold text-primary mt-2">
                 Amount: {amount} {t('currency.egp')}
+                {discountAmount > 0 && (
+                  <span className="text-sm font-normal text-muted-foreground line-through ml-2">
+                    {originalAmount}
+                  </span>
+                )}
               </p>
             </div>
           )}
+
+          <div className="space-y-4">
+            <Label>Promo Code (Optional)</Label>
+            <div className="flex gap-2">
+              <Input
+                placeholder="Enter code"
+                value={promoCode}
+                onChange={e => setPromoCode(e.target.value)}
+                disabled={!!appliedPromoId}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleApplyPromo}
+                disabled={applyingPromo || !!appliedPromoId || !promoCode}
+              >
+                {applyingPromo ? <Loader2 className="w-4 h-4 animate-spin" /> : appliedPromoId ? 'Applied' : 'Apply'}
+              </Button>
+            </div>
+            {promoError && <p className="text-xs text-destructive">{promoError}</p>}
+            {appliedPromoId && <p className="text-xs text-green-500">Promo code applied!</p>}
+          </div>
 
           <div className="space-y-4">
             <Label>Payment Method</Label>

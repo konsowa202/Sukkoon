@@ -94,8 +94,25 @@ CREATE TABLE IF NOT EXISTS payments (
   method VARCHAR(50) NOT NULL CHECK (method IN ('bank_transfer', 'vodafone_cash', 'instapay')),
   status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
   proof_image_url TEXT,
+  promo_code_id UUID, -- References promo_codes(id) but without strict FK for now
+  original_amount INTEGER,
+  discount_amount INTEGER,
   verified_at TIMESTAMP WITH TIME ZONE,
   verified_by UUID REFERENCES users(id),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Promo Codes Table
+CREATE TABLE IF NOT EXISTS promo_codes (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  code VARCHAR(50) UNIQUE NOT NULL,
+  discount_percent INTEGER NOT NULL CHECK (discount_percent > 0 AND discount_percent <= 100),
+  doctor_id UUID REFERENCES doctors(id) ON DELETE CASCADE, -- Optional restriction
+  max_uses INTEGER DEFAULT 100,
+  current_uses INTEGER DEFAULT 0,
+  is_active BOOLEAN DEFAULT TRUE,
+  expires_at TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

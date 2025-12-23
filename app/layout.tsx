@@ -30,8 +30,9 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="notranslate" translate="no">
       <head>
+        <meta name="google" content="notranslate" />
         <link rel="icon" href="/images/whatsapp-20image-202025-12-03-20at-201.jpeg" />
         <script
           dangerouslySetInnerHTML={{
