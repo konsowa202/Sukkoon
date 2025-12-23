@@ -33,6 +33,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
 
+  // Helper function to set cookie
+  const setCookie = (name: string, value: string, days: number) => {
+    if (typeof document !== 'undefined') {
+      const expires = new Date()
+      expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000)
+      const secure = process.env.NODE_ENV === 'production' ? '; Secure' : ''
+      document.cookie = `${name}=${value}; path=/; expires=${expires.toUTCString()}; SameSite=Lax${secure}`
+    }
+  }
+
   // Always provide default context value to prevent hooks order issues
   const defaultContextValue = {
     user: null,
@@ -154,11 +164,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         const redirectPath = role === "doctor" ? "/doctor/dashboard" : "/patient/dashboard"
-        if (typeof window !== 'undefined') {
-          setTimeout(() => {
-            window.location.href = redirectPath
-          }, 100)
+        if (typeof window !== 'undefined' && data.token) {
+          // Also set cookie for server-side middleware
+          setCookie('sukoon_token', data.token, 7)
         }
+        router.push(redirectPath)
         return true
       } else {
         const errorData = await response.json().catch(() => ({ error: 'Registration failed' }))
@@ -196,6 +206,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           localStorage.setItem("sukoon_user", JSON.stringify(userData))
           if (data.token) {
             localStorage.setItem("sukoon_token", data.token)
+            // Also set cookie for server-side middleware
+            setCookie('sukoon_token', data.token, 7)
           }
         }
 
@@ -204,11 +216,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             userData.role === "doctor" ? "/doctor/dashboard" :
               "/patient/dashboard"
 
-        if (typeof window !== 'undefined') {
-          setTimeout(() => {
-            window.location.href = redirectPath
-          }, 100)
-        }
+        // Use router.push for better navigation
+        router.push(redirectPath)
         return true
       } else {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
@@ -233,7 +242,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (typeof window !== 'undefined') {
       localStorage.removeItem("sukoon_user")
       localStorage.removeItem("sukoon_token")
-      window.location.href = "/login"
+      // Clear cookie
+      setCookie('sukoon_token', '', -1)
+      router.push("/login")
     }
   }
 

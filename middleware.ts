@@ -16,14 +16,11 @@ export function middleware(request: NextRequest) {
     const token = request.cookies.get('sukoon_token')?.value ||
       request.headers.get('authorization')?.replace('Bearer ', '')
 
-    // If no token in cookie/header, allow (client-side will check localStorage)
-    // This allows Mock authentication to work
+    // If no token in cookie/header, allow client-side to handle it
+    // Client-side auth will check localStorage and redirect if needed
     if (!token) {
-      // In development, allow access - client-side auth will handle it
-      if (process.env.NODE_ENV === 'development') {
-        return NextResponse.next()
-      }
-      return NextResponse.redirect(new URL('/login', request.url))
+      // Allow access - client-side auth will handle redirect if user not logged in
+      return NextResponse.next()
     }
 
     const payload = verifyToken(token)
