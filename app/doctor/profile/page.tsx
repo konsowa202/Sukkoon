@@ -113,7 +113,8 @@ export default function DoctorProfilePage() {
         },
         body: JSON.stringify({
           ...formData,
-          phone: formData.phone // Ensure phone is sent
+          phone: formData.phone,
+          gender: formData.gender // Explicitly ensure gender is passed
         })
       })
 
@@ -213,6 +214,30 @@ export default function DoctorProfilePage() {
     }
   }
 
+  const calculateCompletion = (data: any) => {
+    if (!data) return 0
+    const fields = [
+      { key: 'specialization', weight: 15 },
+      { key: 'bio', weight: 20 },
+      { key: 'image', weight: 15, custom: (v: any) => v && v !== '/placeholder.svg' },
+      { key: 'priceOnline', weight: 10, custom: (v: any) => v > 0 },
+      { key: 'gender', weight: 10 },
+      { key: 'city', weight: 10 },
+      { key: 'languages', weight: 10, custom: (v: any) => v && v.length > 0 },
+      { key: 'availability', weight: 10, custom: (v: any) => v && Object.keys(v).length > 0 },
+    ]
+
+    let score = 0
+    fields.forEach(f => {
+      const val = data[f.key]
+      const isValid = f.custom ? f.custom(val) : !!val
+      if (isValid) score += f.weight
+    })
+    return score
+  }
+
+  const completionScore = calculateCompletion(formData)
+
   if (authLoading || loading || !user || user.role !== 'doctor') {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -281,6 +306,31 @@ export default function DoctorProfilePage() {
               </div>
             )}
           </div>
+
+          {/* Profile Completion Bar */}
+          <Card className="p-6 transition-all border-primary/20 bg-primary/5">
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <div className="space-y-1">
+                  <h3 className="font-bold">Profile Completion: {completionScore}%</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {completionScore < 100
+                      ? "Complete your profile to become visible to patients"
+                      : "Your profile is complete and visible!"}
+                  </p>
+                </div>
+                {completionScore < 100 && (
+                  <Badge variant="destructive" className="animate-pulse">Hidden</Badge>
+                )}
+              </div>
+              <div className="w-full bg-muted rounded-full h-3">
+                <div
+                  className="bg-primary h-3 rounded-full transition-all duration-1000"
+                  style={{ width: `${completionScore}%` }}
+                />
+              </div>
+            </div>
+          </Card>
 
           {/* Profile Card */}
           <Card className="p-8">

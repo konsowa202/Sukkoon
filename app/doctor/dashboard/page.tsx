@@ -135,6 +135,30 @@ function DoctorDashboardContent() {
 
   const [stats, setStats] = useState({ totalEarnings: 0, totalPatients: 0, thisMonthSessions: 0, completedSessions: 0 })
 
+  const calculateCompletion = (data: any) => {
+    if (!data) return 0
+    const fields = [
+      { key: 'specialization', weight: 15 },
+      { key: 'bio', weight: 20 },
+      { key: 'image', weight: 15, custom: (v: any) => v && v !== '/placeholder.svg' },
+      { key: 'priceOnline', weight: 10, custom: (v: any) => v > 0 },
+      { key: 'gender', weight: 10 },
+      { key: 'city', weight: 10 },
+      { key: 'languages', weight: 10, custom: (v: any) => v && v.length > 0 },
+      { key: 'availability', weight: 10, custom: (v: any) => v && Object.keys(v).length > 0 },
+    ]
+
+    let score = 0
+    fields.forEach(f => {
+      const val = data[f.key]
+      const isValid = f.custom ? f.custom(val) : !!val
+      if (isValid) score += f.weight
+    })
+    return score
+  }
+
+  const completionScore = calculateCompletion(doctorData)
+
   if (isLoading || !user || user.role !== "doctor") {
     return null
   }
@@ -276,6 +300,35 @@ function DoctorDashboardContent() {
               <Link href="/doctor/profile">Edit Profile</Link>
             </Button>
           </div>
+
+          {/* Profile Completion Bar */}
+          <Card className="p-6 overflow-hidden">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex-1 space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Profile Completion: {completionScore}%</span>
+                  {completionScore < 100 && (
+                    <Badge variant="destructive" className="animate-pulse">Incomplete</Badge>
+                  )}
+                </div>
+                <div className="w-full bg-muted rounded-full h-2.5">
+                  <div
+                    className="bg-primary h-2.5 rounded-full transition-all duration-1000"
+                    style={{ width: `${completionScore}%` }}
+                  />
+                </div>
+              </div>
+              {completionScore < 100 ? (
+                <div className="text-sm text-destructive font-medium bg-destructive/5 p-3 rounded-lg border border-destructive/20">
+                  ⚠️ Your profile is hidden from patients until it reaches 100%!
+                </div>
+              ) : (
+                <div className="text-sm text-green-500 font-medium bg-green-500/5 p-3 rounded-lg border border-green-500/20">
+                  ✅ Your profile is fully visible in search results.
+                </div>
+              )}
+            </div>
+          </Card>
 
           {/* Stats */}
           {loading ? renderStatsSkeletons() : (

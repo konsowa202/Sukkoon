@@ -128,6 +128,7 @@ export async function PATCH(
     if (doctorFields.image) userUpdateFields.image_url = doctorFields.image
 
     if (Object.keys(userUpdateFields).length > 0) {
+      if (doctorFields.gender) userUpdateFields.gender = doctorFields.gender // Sync gender to users table
       const { error: userUpdateError } = await supabaseServer
         .from('users')
         .update(userUpdateFields)

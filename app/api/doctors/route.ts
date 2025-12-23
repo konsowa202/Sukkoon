@@ -54,6 +54,7 @@ export async function GET(request: NextRequest) {
       query = query.eq('is_verified', false)
     } else if (!isAdmin) {
       query = query.eq('is_verified', true)
+        .or('price_online.gt.0,price_offline.gt.0')
     }
 
     if (specialization && specialization !== 'all') {
