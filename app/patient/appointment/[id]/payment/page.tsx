@@ -160,7 +160,7 @@ export default function PaymentPage() {
       return
     }
 
-    if (!proofUrl && !proofFile) {
+    if (!proofUrl && !proofFile && amount > 0) {
       setError('Please upload payment proof')
       return
     }
@@ -371,6 +371,9 @@ export default function PaymentPage() {
                 )}
               </label>
             </div>
+            {amount === 0 && (
+              <p className="text-sm text-green-500 font-medium">Free session: No payment proof required.</p>
+            )}
             {proofUrl && (
               <img src={proofUrl} alt="Proof" className="max-w-full h-auto rounded-lg border" />
             )}
@@ -386,7 +389,7 @@ export default function PaymentPage() {
             onClick={handleSubmit}
             className="w-full"
             size="lg"
-            disabled={loading || uploading || !selectedMethod || (!proofUrl && !proofFile)}
+            disabled={loading || uploading || !selectedMethod || (amount > 0 && !proofUrl && !proofFile)}
           >
             {loading ? (
               <>

@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
 
     const { appointmentId, amount, method, proofImageUrl } = await request.json()
 
-    if (!appointmentId || !amount || !method) {
+    if (!appointmentId || typeof amount !== 'number' || !method) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
