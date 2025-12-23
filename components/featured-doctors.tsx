@@ -1,0 +1,153 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import Image from "next/image"
+import Link from "next/link"
+import { Star, ArrowRight, MapPin, Globe } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { type Doctor } from "@/lib/fallback-data"
+import { useLanguage } from "@/contexts/language-context"
+import { Skeleton } from "@/components/ui/skeleton"
+
+export function FeaturedDoctors() {
+    const { t } = useLanguage()
+    const [doctors, setDoctors] = useState<Doctor[]>([])
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const fetchDoctors = async () => {
+            try {
+                const response = await fetch('/api/doctors')
+                if (response.ok) {
+                    const data = await response.json()
+                    setDoctors(data.slice(0, 4))
+                } else {
+                    setDoctors([])
+                }
+            } catch (error) {
+                console.error('Failed to fetch doctors:', error)
+                setDoctors([])
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchDoctors()
+    }, [])
+
+    return (
+        <section className="container mx-auto px-4 py-20">
+            <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+                <div className="space-y-4">
+                    <h2 className="text-3xl md:text-5xl font-black tracking-tight">Top Rated Doctors</h2>
+                    <p className="text-lg text-muted-foreground max-w-2xl">
+                        Meet our highly qualified specialists dedicated to your mental well-being
+                    </p>
+                </div>
+                <Button asChild variant="ghost" className="hidden md:flex gap-2 text-primary hover:text-primary hover:bg-primary/10">
+                    <Link href="/patient/search">
+                        View All Doctors <ArrowRight className="w-4 h-4" />
+                    </Link>
+                </Button>
+            </div>
+
+            {/* Responsive Container: Horizontal Scroll on Mobile, Grid on Desktop */}
+            <div className="flex -mx-4 px-4 overflow-x-auto pb-8 snap-x snap-mandatory md:grid md:grid-cols-2 lg:grid-cols-4 gap-6 md:overflow-visible md:pb-0 hide-scrollbar">
+                {loading ? (
+                    // Skeleton Loading State
+                    Array.from({ length: 4 }).map((_, i) => (
+                        <div key={i} className="min-w-[280px] sm:min-w-[320px] md:min-w-0 snap-center">
+                            <Card className="p-6 space-y-4 h-full border-none bg-card">
+                                <Skeleton className="h-48 w-full rounded-xl" />
+                                <div className="space-y-2">
+                                    <Skeleton className="h-6 w-3/4" />
+                                    <Skeleton className="h-4 w-1/2" />
+                                </div>
+                                <div className="flex gap-2">
+                                    <Skeleton className="h-4 w-1/4" />
+                                    <Skeleton className="h-4 w-1/4" />
+                                </div>
+                                <div className="pt-4 border-t flex justify-between items-center">
+                                    <div className="space-y-1">
+                                        <Skeleton className="h-3 w-12" />
+                                        <Skeleton className="h-6 w-20" />
+                                    </div>
+                                    <Skeleton className="h-9 w-24 rounded-md" />
+                                </div>
+                            </Card>
+                        </div>
+                    ))
+                ) : (
+                    doctors.map((doctor) => (
+                        <div key={doctor.id} className="min-w-[280px] sm:min-w-[320px] md:min-w-0 snap-center">
+                            <Card className="h-full group hover:border-primary/50 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/5 border-none bg-card overflow-hidden">
+                                <div className="relative h-64 overflow-hidden">
+                                    <Image
+                                        src={doctor.image || "/placeholder.svg"}
+                                        alt={doctor.name}
+                                        fill
+                                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                    />
+                                    <div className="absolute top-4 right-4">
+                                        <Badge className="bg-background/80 backdrop-blur text-foreground font-bold border-none">
+                                            <Star className="w-3 h-3 fill-yellow-500 text-yellow-500 mr-1" />
+                                            {doctor.rating}
+                                        </Badge>
+                                    </div>
+                                </div>
+
+                                <div className="p-6 space-y-4">
+                                    <div>
+                                        <h3 className="text-xl font-bold group-hover:text-primary transition-colors">{doctor.name}</h3>
+                                        <p className="text-sm text-primary font-medium">{doctor.specialization}</p>
+                                    </div>
+
+                                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                        <div className="flex items-center gap-1">
+                                            <Globe className="w-3 h-3" />
+                                            {doctor.languages?.[0]} {doctor.languages?.length > 1 && `+${doctor.languages.length - 1}`}
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <MapPin className="w-3 h-3" />
+                                            {doctor.city || "Online"}
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-2 border-t flex items-center justify-between">
+                                        <div className="space-y-0.5">
+                                            <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Starting from</p>
+                                            <p className="text-lg font-black text-foreground">
+                                                {doctor.priceOnline} <span className="text-xs font-normal text-muted-foreground">EGP</span>
+                                            </p>
+                                        </div>
+                                        <Button size="sm" asChild className="shadow-lg shadow-primary/20">
+                                            <Link href={`/patient/doctor/${doctor.id}`}>Book Now</Link>
+                                        </Button>
+                                    </div>
+                                </div>
+                            </Card>
+                        </div>
+                    ))
+                )}
+            </div>
+
+            <div className="mt-8 md:hidden">
+                <Button asChild variant="outline" className="w-full">
+                    <Link href="/patient/search">View All Doctors</Link>
+                </Button>
+            </div>
+
+            <style jsx>{`
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
+        </section>
+    )
+}
