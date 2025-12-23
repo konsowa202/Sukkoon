@@ -33,13 +33,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
 
-  // Helper function to set cookie
+  // Helper function to set cookie (for client-side fallback)
   const setCookie = (name: string, value: string, days: number) => {
     if (typeof document !== 'undefined') {
       const expires = new Date()
       expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000)
-      const secure = process.env.NODE_ENV === 'production' ? '; Secure' : ''
-      document.cookie = `${name}=${value}; path=/; expires=${expires.toUTCString()}; SameSite=Lax${secure}`
+      const isProduction = window.location.hostname.includes('suukoon.com')
+      const secure = isProduction ? '; Secure' : ''
+      const domain = isProduction ? '; domain=.suukoon.com' : ''
+      document.cookie = `${name}=${value}; path=/; expires=${expires.toUTCString()}; SameSite=Lax${secure}${domain}`
     }
   }
 

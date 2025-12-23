@@ -51,12 +51,14 @@ export async function POST(request: NextRequest) {
       doctorProfile
     })
 
-    // Set cookie
+    // Set cookie - important for session persistence
+    const isProduction = process.env.NODE_ENV === 'production'
     response.cookies.set('sukoon_token', authResult.token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      httpOnly: false, // Allow client-side access for compatibility with localStorage
+      secure: isProduction,
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7 // 7 days
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/'
     })
 
     return response
