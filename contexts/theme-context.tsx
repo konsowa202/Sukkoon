@@ -12,13 +12,14 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("light")
+  const [theme, setTheme] = useState<Theme>("dark") // Default to dark mode
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
     const stored = localStorage.getItem("sukoon_theme") as Theme | null
-    const preferredTheme = stored || "light"
+    // Default to dark mode if no preference stored
+    const preferredTheme = stored || "dark"
 
     setTheme(preferredTheme)
 

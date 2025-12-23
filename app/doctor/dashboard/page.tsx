@@ -53,6 +53,11 @@ function DoctorDashboardContent() {
   const [activeView, setActiveView] = useState<'overview' | 'earnings' | 'patients' | 'reports'>('overview')
   const [payments, setPayments] = useState<any[]>([])
   const [isAddingPatient, setIsAddingPatient] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
   const [newPatientData, setNewPatientData] = useState({
     name: "",
     phone: "",
@@ -68,10 +73,10 @@ function DoctorDashboardContent() {
   }, [searchParams])
 
   useEffect(() => {
-    if (!isLoading && (!user || user.role !== "doctor")) {
+    if (mounted && !isLoading && (!user || user.role !== "doctor")) {
       router.push("/login")
     }
-  }, [user, isLoading, router])
+  }, [user, isLoading, router, mounted])
 
   useEffect(() => {
     if (user && user.role === 'doctor') {

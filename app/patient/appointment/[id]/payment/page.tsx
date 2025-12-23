@@ -179,23 +179,24 @@ export default function PaymentPage() {
   }
 
   const paymentMethods = [
-    {
-      id: 'bank_transfer' as const,
-      name: 'Bank Transfer',
-      icon: Building,
-      details: 'Transfer to Account: 1234567890 - Bank: CIB'
-    },
+    // Bank transfer disabled for now
+    // {
+    //   id: 'bank_transfer' as const,
+    //   name: 'Bank Transfer',
+    //   icon: Building,
+    //   details: 'Transfer to Account: 1234567890 - Bank: CIB'
+    // },
     {
       id: 'vodafone_cash' as const,
       name: 'Vodafone Cash',
       icon: Smartphone,
-      details: 'Send to Number: 0100 000 0000'
+      details: 'Send to Number: 01006119365'
     },
     {
       id: 'instapay' as const,
       name: 'InstaPay',
       icon: CreditCard,
-      details: 'Transfer to Account: 1234567890'
+      details: 'Transfer to Number: 01102553741'
     }
   ]
 

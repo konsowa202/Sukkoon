@@ -22,8 +22,13 @@ export default function PatientDashboard() {
   const router = useRouter()
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [loading, setLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
   const [activeChat, setActiveChat] = useState<Appointment | null>(null)
   const [ratingAppointment, setRatingAppointment] = useState<Appointment | null>(null)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     if (user) {
@@ -32,10 +37,10 @@ export default function PatientDashboard() {
   }, [user])
 
   useEffect(() => {
-    if (!isLoading && (!user || user.role !== "patient")) {
+    if (mounted && !isLoading && (!user || user.role !== "patient")) {
       router.push("/login")
     }
-  }, [user, isLoading, router])
+  }, [user, isLoading, router, mounted])
 
   const fetchAppointments = async () => {
     try {

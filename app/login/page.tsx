@@ -44,9 +44,20 @@ function LoginPageContent() {
         // If there's a redirect parameter, redirect after login
         const redirect = searchParams.get('redirect')
         if (redirect && typeof window !== 'undefined') {
-          setTimeout(() => {
-            window.location.href = decodeURIComponent(redirect)
-          }, 500)
+          window.location.href = decodeURIComponent(redirect)
+          return
+        }
+
+        // Default redirects based on role from localStorage (since context user might not be updated yet)
+        const storedUser = localStorage.getItem('sukoon_user')
+        if (storedUser) {
+          const user = JSON.parse(storedUser)
+          const dashboardPath =
+            user.role === 'admin' ? '/admin/dashboard' :
+              user.role === 'doctor' ? '/doctor/dashboard' :
+                '/patient/dashboard'
+
+          window.location.href = dashboardPath
         }
       }
     } catch (err: any) {

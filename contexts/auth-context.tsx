@@ -38,10 +38,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (typeof document !== 'undefined') {
       const expires = new Date()
       expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000)
-      const isProduction = window.location.hostname.includes('suukoon.com')
+      const isProduction = window.location.hostname.includes('suukoon.com') || window.location.protocol === 'https:'
       const secure = isProduction ? '; Secure' : ''
-      const domain = isProduction ? '; domain=.suukoon.com' : ''
-      document.cookie = `${name}=${value}; path=/; expires=${expires.toUTCString()}; SameSite=Lax${secure}${domain}`
+      document.cookie = `${name}=${value}; path=/; expires=${expires.toUTCString()}; SameSite=Lax${secure}`
     }
   }
 
@@ -60,12 +59,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const storedUser = localStorage.getItem("sukoon_user")
         const storedToken = localStorage.getItem("sukoon_token")
-        
+
         // Sync cookie with localStorage token
         if (storedToken) {
           setCookie('sukoon_token', storedToken, 7)
         }
-        
+
         if (storedUser) {
           const parsedUser = JSON.parse(storedUser)
           // Only update if user actually changed to avoid unnecessary re-renders
@@ -172,12 +171,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
 
-        const redirectPath = role === "doctor" ? "/doctor/dashboard" : "/patient/dashboard"
         if (typeof window !== 'undefined' && data.token) {
           // Also set cookie for server-side middleware
           setCookie('sukoon_token', data.token, 7)
         }
-        router.push(redirectPath)
         return true
       } else {
         const errorData = await response.json().catch(() => ({ error: 'Registration failed' }))
@@ -220,13 +217,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
 
-        const redirectPath =
-          userData.role === "admin" ? "/admin/dashboard" :
-            userData.role === "doctor" ? "/doctor/dashboard" :
-              "/patient/dashboard"
-
-        // Use router.push for better navigation
-        router.push(redirectPath)
         return true
       } else {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
