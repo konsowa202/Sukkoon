@@ -19,6 +19,8 @@ export async function GET(request: NextRequest) {
     const consultationType = searchParams.get('consultationType')
     const city = searchParams.get('city')
     const search = searchParams.get('search')
+    const minPrice = searchParams.get('minPrice')
+    const maxPrice = searchParams.get('maxPrice')
     const verified = searchParams.get('verified') // New: filter by verification status
     const adminToken = searchParams.get('admin') // For admin to see all doctors
 
@@ -72,6 +74,12 @@ export async function GET(request: NextRequest) {
     }
     if (search) {
       query = query.or(`specialization.ilike.%${search}%,bio.ilike.%${search}%`)
+    }
+    if (minPrice) {
+      query = query.gte('price_online', parseFloat(minPrice))
+    }
+    if (maxPrice) {
+      query = query.lte('price_online', parseFloat(maxPrice))
     }
 
     const { data, error } = await query

@@ -58,7 +58,7 @@ export default function AdminDashboard() {
       // Fetch all needed data
       const [pendingRes, doctorsRes, patientsRes, appointmentsRes, paymentsRes, promoRes] = await Promise.all([
         fetch('/api/doctors?verified=false', { headers }),
-        fetch('/api/doctors', { headers }),
+        fetch('/api/doctors?verified=true', { headers }),
         fetch('/api/users?role=patient', { headers }),
         fetch('/api/appointments', { headers }),
         fetch('/api/payments', { headers }),
@@ -192,7 +192,7 @@ export default function AdminDashboard() {
           'Content-Type': 'application/json',
           'Authorization': token ? `Bearer ${token}` : ''
         },
-        body: JSON.stringify({ is_verified: true })
+        body: JSON.stringify({ isVerified: true })
       })
 
       if (response.ok) {
@@ -1108,6 +1108,82 @@ export default function AdminDashboard() {
               Delete Permanently
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Promo Code Dialog */}
+      <Dialog open={dialogType === "promo"} onOpenChange={(open) => !open && setDialogType(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create Promo Code</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={async (e) => {
+            e.preventDefault();
+            setIsSubmitting(true);
+            try {
+              const token = localStorage.getItem('sukoon_token');
+              const response = await fetch('/api/promo-codes', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': token ? `Bearer ${token}` : ''
+                },
+                body: JSON.stringify(formData)
+              });
+
+              if (response.ok) {
+                toast({ title: "Success", description: "Promo code created" });
+                setDialogType(null);
+                fetchAllData();
+              } else {
+                const err = await response.json();
+                toast({ variant: "destructive", title: "Error", description: err.error || "Failed to create" });
+              }
+            } catch (error) {
+              console.error('Promo creation error:', error);
+            } finally {
+              setIsSubmitting(false);
+            }
+          }} className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Code</label>
+              <Input
+                value={formData.code || ''}
+                onChange={e => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                required
+                placeholder="PROMO25"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Discount Percentage</label>
+              <Input
+                type="number"
+                value={formData.discount_percent || ''}
+                onChange={e => setFormData({ ...formData, discount_percent: parseInt(e.target.value) })}
+                required
+                min="1"
+                max="100"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Max Uses</label>
+              <Input
+                type="number"
+                value={formData.max_uses || ''}
+                onChange={e => setFormData({ ...formData, max_uses: parseInt(e.target.value) })}
+                required
+              />
+            </div>
+            {formData.doctor_id && (
+              <p className="text-xs text-muted-foreground italic">Restricted to selected doctor</p>
+            )}
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setDialogType(null)}>Cancel</Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Creating..." : "Create Code"}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 

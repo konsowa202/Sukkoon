@@ -49,6 +49,18 @@ export default function SearchDoctorsPage() {
       if (cityFilter !== 'all') params.append('city', cityFilter)
       if (searchTerm) params.append('search', searchTerm)
 
+      if (priceRange === 'low') {
+        params.append('minPrice', '150')
+        params.append('maxPrice', '500')
+      } else if (priceRange === 'medium') {
+        params.append('minPrice', '500')
+        params.append('maxPrice', '1500')
+      } else if (priceRange === 'high') {
+        params.append('minPrice', '1500')
+      } else if (priceRange === 'very-high') {
+        params.append('maxPrice', '20000')
+      }
+
       const response = await fetch(`/api/doctors?${params.toString()}`)
       if (response.ok) {
         const data = await response.json()
@@ -169,9 +181,10 @@ export default function SearchDoctorsPage() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Prices</SelectItem>
-            <SelectItem value="low">Under 4,500 {t("currency.egp")}</SelectItem>
-            <SelectItem value="medium">4,500 - 5,400 {t("currency.egp")}</SelectItem>
-            <SelectItem value="high">Above 5,400 {t("currency.egp")}</SelectItem>
+            <SelectItem value="low">Budget (150 - 500 {t("currency.egp")})</SelectItem>
+            <SelectItem value="medium">Value (500 - 1,500 {t("currency.egp")})</SelectItem>
+            <SelectItem value="high">Premium (Above 1,500 {t("currency.egp")})</SelectItem>
+            <SelectItem value="very-high">Specialized (Up to 20,000 {t("currency.egp")})</SelectItem>
           </SelectContent>
         </Select>
       </div>
