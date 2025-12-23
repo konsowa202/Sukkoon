@@ -12,7 +12,6 @@ import Image from "next/image"
 import { NumberCounter } from "@/components/number-counter"
 import { TestimonialsMarquee } from "@/components/testimonials-marquee"
 import { FeaturedDoctors } from "@/components/featured-doctors"
-import { useEffect } from "react"
 
 const Hero3D = dynamic(() => import("@/components/hero-3d").then((mod) => ({ default: mod.Hero3D })), {
   ssr: false,
@@ -20,21 +19,8 @@ const Hero3D = dynamic(() => import("@/components/hero-3d").then((mod) => ({ def
 })
 
 function HomePageContent() {
-  const { t, language } = useLanguage()
+  const { t } = useLanguage()
   const { user } = useAuth()
-
-  // Set Arabic as default language for landing page only (if no preference stored)
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem("sukoon_language")
-      // Only set Arabic if no language preference is stored (first visit to landing page)
-      if (!stored) {
-        localStorage.setItem("sukoon_language", "ar")
-        document.documentElement.dir = "rtl"
-        document.documentElement.lang = "ar"
-      }
-    }
-  }, []) // Run only once on mount
 
   const getDashboardPath = () => {
     if (!user) return "/login"
