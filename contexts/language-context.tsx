@@ -177,6 +177,17 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
         setLanguage(stored)
         document.documentElement.dir = stored === "ar" ? "rtl" : "ltr"
         document.documentElement.lang = stored
+      } else {
+        // No stored preference - check if we're on landing page
+        const isLandingPage = window.location.pathname === '/'
+        const defaultLang: Language = isLandingPage ? "ar" : "en"
+        setLanguage(defaultLang)
+        document.documentElement.dir = defaultLang === "ar" ? "rtl" : "ltr"
+        document.documentElement.lang = defaultLang
+        // Save preference for landing page
+        if (isLandingPage) {
+          localStorage.setItem("sukoon_language", "ar")
+        }
       }
     }
   }, [])

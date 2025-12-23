@@ -12,15 +12,29 @@ import Image from "next/image"
 import { NumberCounter } from "@/components/number-counter"
 import { TestimonialsMarquee } from "@/components/testimonials-marquee"
 import { FeaturedDoctors } from "@/components/featured-doctors"
+import { useEffect } from "react"
 
 const Hero3D = dynamic(() => import("@/components/hero-3d").then((mod) => ({ default: mod.Hero3D })), {
   ssr: false,
   loading: () => <div className="w-full h-full bg-primary/10 animate-pulse rounded-2xl" />,
 })
 
-export default function HomePage() {
-  const { t } = useLanguage()
+function HomePageContent() {
+  const { t, language } = useLanguage()
   const { user } = useAuth()
+
+  // Set Arabic as default language for landing page only (if no preference stored)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem("sukoon_language")
+      // Only set Arabic if no language preference is stored (first visit to landing page)
+      if (!stored) {
+        localStorage.setItem("sukoon_language", "ar")
+        document.documentElement.dir = "rtl"
+        document.documentElement.lang = "ar"
+      }
+    }
+  }, []) // Run only once on mount
 
   const getDashboardPath = () => {
     if (!user) return "/login"
@@ -314,4 +328,8 @@ export default function HomePage() {
       `}</style>
     </div>
   )
+}
+
+export default function HomePage() {
+  return <HomePageContent />
 }
