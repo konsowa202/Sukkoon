@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useAuth } from "@/contexts/auth-context"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -37,7 +37,7 @@ interface Appointment {
 import { Skeleton } from "@/components/ui/skeleton"
 import { HeaderNav } from "@/components/header-nav"
 
-export default function DoctorDashboard() {
+function DoctorDashboardContent() {
   const { user, logout, isLoading } = useAuth()
   const router = useRouter()
   const [appointments, setAppointments] = useState<Appointment[]>([])
@@ -806,6 +806,18 @@ export default function DoctorDashboard() {
         </DialogContent>
       </Dialog>
     </div>
+  )
+}
+
+export default function DoctorDashboard() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    }>
+      <DoctorDashboardContent />
+    </Suspense>
   )
 }
 
