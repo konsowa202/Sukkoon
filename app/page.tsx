@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Brain, Users, Shield, Clock, CheckCircle, Star, ArrowRight } from "lucide-react"
+import { Brain, Users, Shield, Clock, CheckCircle, Star, ArrowRight, Heart } from "lucide-react"
 import { HeaderNav } from "@/components/header-nav"
 import { useLanguage } from "@/contexts/language-context"
 import { useAuth } from "@/contexts/auth-context"
@@ -206,6 +206,32 @@ function HomePageContent() {
 
       {/* Featured Doctors Section */}
       <FeaturedDoctors />
+
+      {/* Donation Section */}
+      <section className="container mx-auto px-4 py-20">
+        <div className="bg-primary/5 rounded-[3rem] p-8 md:p-16 border border-primary/10 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -mr-32 -mt-32 transition-transform duration-700 group-hover:scale-110" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-accent/10 rounded-full blur-3xl -ml-32 -mb-32 transition-transform duration-700 group-hover:scale-110" />
+
+          <div className="max-w-3xl mx-auto text-center space-y-8 relative z-10">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-bold">
+              <Heart className="w-4 h-4" />
+              {t("nav.donate")}
+            </div>
+            <h2 className="text-3xl md:text-5xl font-black tracking-tight">{t("donate.title")}</h2>
+            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
+              {t("donate.subtitle")}
+            </p>
+            <div className="pt-4">
+              <Button size="lg" asChild className="text-lg px-12 py-7 rounded-2xl shadow-xl shadow-primary/20 hover:-translate-y-1 transition-all">
+                <Link href="/donate">
+                  {t("donate.cta")} <ArrowRight className="ml-2 w-5 h-5" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Testimonials */}
       <section className="py-20 bg-muted/30 overflow-hidden">

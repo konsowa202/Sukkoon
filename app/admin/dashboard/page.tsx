@@ -413,6 +413,12 @@ export default function AdminDashboard() {
                 Payment Verification
               </Link>
             </Button>
+            <Button asChild variant="outline" className="border-primary/20 hover:bg-primary/5">
+              <Link href="/admin/donations">
+                <Heart className="w-4 h-4 mr-2 text-primary" />
+                Donations Management
+              </Link>
+            </Button>
           </div>
 
           {/* Stats */}

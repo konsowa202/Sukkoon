@@ -19,6 +19,7 @@ const translations = {
     "nav.login": "Login",
     "nav.signup": "Sign Up",
     "nav.findDoctor": "Find a Doctor",
+    "nav.donate": "Donate a Session",
 
     // Hero
     "hero.title": "Your Journey to Mental Wellness Starts Here",
@@ -86,6 +87,18 @@ const translations = {
     "how.step4.desc": "Attend your session and begin your journey to wellness",
     "testimonials.title": "What Our Users Say",
     "testimonials.subtitle": "Real experiences from people who joined the Sukoon community",
+
+    // Donation
+    "donate.title": "Donate a Session",
+    "donate.subtitle": "Support others on their mental health journey by providing sessions for those in need.",
+    "donate.cta": "Donate Now",
+    "donate.type.general": "General Donation",
+    "donate.type.doctor": "Specific Doctor",
+    "donate.anonymous": "Donate Anonymously",
+    "donate.register": "Register as Patient",
+    "donate.amount": "Donation Amount",
+    "donate.sessions": "Number of Sessions",
+    "donate.success": "Donated Successfully! Waiting for approval.",
   },
   ar: {
     // Navigation
@@ -95,6 +108,7 @@ const translations = {
     "nav.login": "تسجيل الدخول",
     "nav.signup": "التسجيل",
     "nav.findDoctor": "ابحث عن طبيب",
+    "nav.donate": "تبرع بجلسة",
 
     // Hero
     "hero.title": "رحلتك نحو الصحة النفسية تبدأ هنا",
@@ -160,6 +174,18 @@ const translations = {
     "how.step4.desc": "احضر جلستك وابدأ رحلتك نحو العافية",
     "testimonials.title": "ماذا يقول مستخدمونا",
     "testimonials.subtitle": "تجارب حقيقية من أشخاص انضموا إلى مجتمع سكون",
+
+    // Donation
+    "donate.title": "تبرع بجلسة",
+    "donate.subtitle": "ادعم الآخرين في رحلة صحتهم النفسية من خلال توفير جلسات لمن يحتاجها.",
+    "donate.cta": "تبرع الآن",
+    "donate.type.general": "تبرع عام",
+    "donate.type.doctor": "طبيب محدد",
+    "donate.anonymous": "تبرع مجهول الهوية",
+    "donate.register": "تسجيل كمريض",
+    "donate.amount": "مبلغ التبرع",
+    "donate.sessions": "عدد الجلسات",
+    "donate.success": "تم التبرع بنجاح! في انتظار المراجعة.",
   },
 }
 
