@@ -189,11 +189,11 @@ export default function DonatePage() {
                                         </div>
                                         Vodafone Cash
                                     </h3>
-                                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleCopy("01012345678", "Vodafone Cash")}>
+                                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleCopy("01006119365", "Vodafone Cash")}>
                                         {copied === "Vodafone Cash" ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
                                     </Button>
                                 </div>
-                                <div className="text-2xl font-black tracking-widest text-center py-2 bg-background/50 rounded-xl">01012345678</div>
+                                <div className="text-2xl font-black tracking-widest text-center py-2 bg-background/50 rounded-xl">01006119365</div>
                             </Card>
                             <Card className="p-6 border-primary/20 bg-primary/5 space-y-4">
                                 <div className="flex justify-between items-center">
@@ -203,11 +203,11 @@ export default function DonatePage() {
                                         </div>
                                         InstaPay
                                     </h3>
-                                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleCopy("sukoon@instapay", "InstaPay")}>
+                                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleCopy("01102553741", "InstaPay")}>
                                         {copied === "InstaPay" ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
                                     </Button>
                                 </div>
-                                <div className="text-xl font-black tracking-tight text-center py-2 bg-background/50 rounded-xl">sukoon@instapay</div>
+                                <div className="text-xl font-black tracking-tight text-center py-2 bg-background/50 rounded-xl">01102553741</div>
                             </Card>
                         </div>
 
