@@ -5,8 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { HeaderNav } from "@/components/header-nav";
 import { Search } from "lucide-react";
 
-export async function generateMetadata({ searchParams }: { searchParams: { q?: string } }): Promise<Metadata> {
-    const q = searchParams.q;
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ q?: string }> }): Promise<Metadata> {
+    const { q } = await searchParams;
     if (!q) {
         return {
             title: "مكتبة سكون للصحة النفسية | دليل الاضطرابات والعلاج",
@@ -21,7 +21,8 @@ export async function generateMetadata({ searchParams }: { searchParams: { q?: s
     };
 }
 
-export default function LibraryPage({ searchParams }: { searchParams: { q?: string } }) {
+export default async function LibraryPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+    const { q } = await searchParams;
     // Default to Arabic for SEO indexing purposes if no language context is available server-side
     // or we can use headers to detect locale if needed, but for global indexing Arabic is priority here.
     const isArabic = true;
@@ -32,10 +33,10 @@ export default function LibraryPage({ searchParams }: { searchParams: { q?: stri
             <main className="container mx-auto px-4 py-12 text-pretty">
                 <div className="max-w-4xl mx-auto mb-16 text-center">
                     <Badge className="mb-4 py-1 px-4 text-sm font-medium" variant="secondary">
-                        {searchParams.q ? `نتائج البحث عن: ${searchParams.q}` : "دليل الصحة النفسية"}
+                        {q ? `نتائج البحث عن: ${q}` : "دليل الصحة النفسية"}
                     </Badge>
                     <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6">
-                        {searchParams.q ? `كل ما تريد معرفته عن ${searchParams.q}` : "مكتبة سكون للصحة النفسية"}
+                        {q ? `كل ما تريد معرفته عن ${q}` : "مكتبة سكون للصحة النفسية"}
                     </h1>
                     <p className="text-xl text-muted-foreground leading-relaxed">
                         دليلك الشامل لجميع الاضطرابات النفسية والأعراض وطرق التعافي. نبحث معك عن الهدوء النفسي.

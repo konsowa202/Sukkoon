@@ -3,8 +3,8 @@ import { notFound } from "next/navigation"
 import { supabaseServer } from "@/lib/db"
 import { DoctorProfileClient } from "@/components/doctor-profile-client"
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  const id = params.id
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
   if (!supabaseServer) return { title: "دكتور نفسي | سكون" }
 
   const { data: doctor } = await supabaseServer
@@ -22,8 +22,8 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   }
 }
 
-export default async function DoctorProfilePage({ params }: { params: { id: string } }) {
-  const id = params.id
+export default async function DoctorProfilePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
 
   if (!supabaseServer) {
     return <div>Database connection missing.</div>
