@@ -5,17 +5,21 @@ import { verifyToken, getTokenFromRequest } from '@/lib/jwt'
 // POST /api/upload - Upload file (payment proof)
 export async function POST(request: NextRequest) {
   try {
+    const formData = await request.formData()
+    const bucket = formData.get('bucket') as string || 'payment-proofs'
+
     const token = getTokenFromRequest(request)
-    if (!token) {
+    let payload = null
+    if (token) {
+      payload = verifyToken(token)
+    }
+
+    // Allow unauthenticated uploads ONLY for payment proofs
+    if (!payload && bucket !== 'payment-proofs') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const payload = verifyToken(token)
-    if (!payload) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
-    }
-
-    const formData = await request.formData()
+    const userId = payload?.userId || 'guest'
     const file = formData.get('file') as File
 
     if (!file) {
@@ -67,7 +71,7 @@ export async function POST(request: NextRequest) {
         .replace(/[^a-zA-Z0-9.-]/g, '_') // Keep only alphanumeric, dots, and hyphens
         .replace(/_{2,}/g, '_')          // Collapse multiple underscores
 
-      const fileName = `${folder}/${payload.userId}/${Date.now()}-${sanitizedOriginalName}`
+      const fileName = `${folder}/${userId}/${Date.now()}-${sanitizedOriginalName}`
       const fileBuffer = await file.arrayBuffer()
 
       let { data, error } = await supabaseServer.storage

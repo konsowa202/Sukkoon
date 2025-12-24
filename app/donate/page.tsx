@@ -87,12 +87,16 @@ export default function DonatePage() {
         setError(null)
 
         try {
+            const token = localStorage.getItem('sukoon_token')
             const formData = new FormData()
             formData.append('file', file)
             formData.append('bucket', 'payment-proofs')
 
             const response = await fetch('/api/upload', {
                 method: 'POST',
+                headers: {
+                    'Authorization': token ? `Bearer ${token}` : ''
+                },
                 body: formData
             })
 
@@ -304,9 +308,14 @@ export default function DonatePage() {
                             <div className="space-y-2">
                                 <Label>{t("donate.amount")} ({t("currency.egp")})</Label>
                                 <Input
-                                    type="number"
+                                    type="text"
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
                                     value={amount}
-                                    onChange={(e) => setAmount(e.target.value)}
+                                    onChange={(e) => {
+                                        const val = e.target.value.replace(/[^0-9]/g, '');
+                                        setAmount(val);
+                                    }}
                                     className="h-12 text-lg font-bold rounded-xl"
                                     placeholder="0.00"
                                 />
