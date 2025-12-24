@@ -1,0 +1,18 @@
+import { MetadataRoute } from 'next'
+
+export default function robots(): MetadataRoute.Robots {
+  return {
+    rules: {
+      userAgent: '*',
+      allow: '/',
+      disallow: [
+        '/admin/',
+        '/doctor/dashboard/',
+        '/patient/dashboard/',
+        '/patient/profile/',
+        '/api/',
+      ],
+    },
+    sitemap: 'https://www.suukoon.com/sitemap.xml',
+  }
+}
