@@ -56,7 +56,8 @@ export async function createUser(
   password: string,
   name: string,
   role: 'doctor' | 'patient',
-  phone?: string
+  phone?: string,
+  image_url?: string
 ): Promise<User | null> {
   const password_hash = await hashPassword(password)
 
@@ -72,7 +73,8 @@ export async function createUser(
       password_hash,
       name,
       role,
-      phone
+      phone,
+      image_url
     })
     .select()
     .single()

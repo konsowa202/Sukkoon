@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useAuth } from "@/contexts/auth-context"
 // Mock data removed - using API only
 import { Button } from "@/components/ui/button"
@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { DollarSign, Users, UserPlus, LogOut, Check, X, Edit, Trash2, Plus, Search, FileText, MessageCircle, Copy, Key, UserCheck, ShieldAlert, Phone, MapPin, Globe, CreditCard, Gift, Heart } from "lucide-react"
+import { DollarSign, Users, UserPlus, LogOut, Check, X, Edit, Trash2, Plus, Search, FileText, MessageCircle, Copy, Key, UserCheck, ShieldAlert, Phone, MapPin, Globe, CreditCard, Gift, Heart, Camera, Loader2 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -39,9 +39,11 @@ export default function AdminDashboard() {
   const [activeChat, setActiveChat] = useState<any>(null)
   const { toast } = useToast()
 
-  const [formData, setFormData] = useState<any>({ availability: {}, languages: ['Arabic', 'English'], gender: 'male', consultationType: 'both', commissionPercent: 10 })
+  const [formData, setFormData] = useState<any>({ availability: {}, languages: ['Arabic', 'English'], gender: 'male', consultationType: 'both', commissionPercent: 10, image: "" })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [generatedCredentials, setGeneratedCredentials] = useState<{ email: string, password: string } | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (user && user.role === 'admin' && !isLoading) {
@@ -236,7 +238,8 @@ export default function AdminDashboard() {
       city: entity.city,
       location: entity.location,
       consultationType: entity.consultationType,
-      commissionPercent: entity.commissionPercent || 10
+      commissionPercent: entity.commissionPercent || 10,
+      image: entity.image || entity.image_url || ""
     })
     setEntityType(type)
     setDialogType("edit")
@@ -287,6 +290,46 @@ export default function AdminDashboard() {
       }
     } catch (error) {
       console.error('Impersonation error:', error)
+    }
+  }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // 1. Immediate Base64 preview
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      setFormData((prev: any) => ({ ...prev, image: reader.result as string }))
+    }
+    reader.readAsDataURL(file)
+
+    setUploading(true)
+    try {
+      const token = localStorage.getItem('sukoon_token')
+      const uploadFormData = new FormData()
+      uploadFormData.append('file', file)
+      uploadFormData.append('folder', 'doctor-profiles')
+      uploadFormData.append('bucket', 'payment-proofs')
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Authorization': token ? `Bearer ${token}` : '' },
+        body: uploadFormData
+      })
+
+      const data = await response.json()
+      if (response.ok) {
+        setFormData((prev: any) => ({ ...prev, image: data.url }))
+        toast({ title: "Success", description: "Image uploaded successfully" })
+      } else {
+        throw new Error(data.error || "Upload failed")
+      }
+    } catch (error: any) {
+      console.error('Image upload error:', error)
+      toast({ variant: "destructive", title: "Upload Failed", description: error.message || "Using preview only" })
+    } finally {
+      setUploading(false)
     }
   }
 
@@ -1139,6 +1182,47 @@ export default function AdminDashboard() {
                   <label className="text-sm font-medium">Location / Address</label>
                   <Input value={formData.location || ''} onChange={e => setFormData({ ...formData, location: e.target.value })} placeholder="Clinic address details" />
                 </div>
+                <div className="col-span-2 space-y-4">
+                  <label className="text-sm font-medium">Profile Image</label>
+                  <div className="flex items-center gap-6">
+                    <div className="relative group w-24 h-24">
+                      <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-muted bg-muted flex items-center justify-center relative">
+                        {formData.image ? (
+                          <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
+                        ) : (
+                          <Users className="w-10 h-10 text-muted-foreground" />
+                        )}
+                        {uploading && (
+                          <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
+                            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                          </div>
+                        )}
+                      </div>
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="icon"
+                        className="absolute bottom-0 right-0 rounded-full w-8 h-8 shadow-md border"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploading}
+                      >
+                        <Camera className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    <div className="flex-1 space-y-1">
+                      <p className="text-sm font-medium">Change Photo</p>
+                      <p className="text-xs text-muted-foreground">Standard size 400x400px recommended. JPG or PNG.</p>
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleImageUpload}
+                        accept="image/*"
+                        className="hidden"
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 <div className="col-span-2 space-y-2">
                   <label className="text-sm font-medium">Bio</label>
                   <textarea

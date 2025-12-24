@@ -21,14 +21,14 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json()
-        const { email, password, name, phone, specialization, bio, priceOnline, priceOffline, experience, gender, languages, city, location } = body
+        const { email, password, name, phone, specialization, bio, priceOnline, priceOffline, experience, gender, languages, city, location, image } = body
 
         if (!email || !password || !name || !phone) {
             return NextResponse.json({ error: 'Email, password, name, and phone are required' }, { status: 400 })
         }
 
         // 1. Create User
-        const newUser = await createUser(email, password, name, 'doctor', phone)
+        const newUser = await createUser(email, password, name, 'doctor', phone, image)
         if (!newUser) {
             return NextResponse.json({ error: 'Failed to create user' }, { status: 500 })
         }
@@ -40,6 +40,7 @@ export async function POST(request: NextRequest) {
                 user_id: newUser.id,
                 specialization: specialization || '',
                 bio: bio || '',
+                image_url: image || '',
                 price_online: Number(priceOnline) || 0,
                 price_offline: Number(priceOffline) || 0,
                 experience: Number(experience) || 0,

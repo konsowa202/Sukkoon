@@ -186,3 +186,25 @@ $$ language 'plpgsql';
 DROP TRIGGER IF EXISTS update_doctor_rating_on_review ON reviews;
 CREATE TRIGGER update_doctor_rating_on_review AFTER INSERT OR UPDATE OR DELETE ON reviews
 FOR EACH ROW EXECUTE FUNCTION update_doctor_rating();
+
+-- Donations Table (New)
+CREATE TABLE IF NOT EXISTS donations (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  donor_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  doctor_id UUID REFERENCES doctors(id) ON DELETE SET NULL,
+  type VARCHAR(50) NOT NULL CHECK (type IN ('general', 'specific_doctor')),
+  amount INTEGER NOT NULL,
+  proof_image_url TEXT NOT NULL,
+  is_anonymous BOOLEAN DEFAULT FALSE,
+  donor_name VARCHAR(255),
+  donor_email VARCHAR(255),
+  status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_donations_doctor_id ON donations(doctor_id);
+CREATE INDEX IF NOT EXISTS idx_donations_status ON donations(status);
+
+DROP TRIGGER IF EXISTS update_donations_updated_at ON donations;
+CREATE TRIGGER update_donations_updated_at BEFORE UPDATE ON donations FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
