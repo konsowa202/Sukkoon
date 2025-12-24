@@ -608,9 +608,13 @@ function DoctorDashboardContent() {
                     className="w-full"
                     onClick={() => {
                       if (selectedAppointment.meetLink) {
-                        window.open(selectedAppointment.meetLink, '_blank')
+                        if (selectedAppointment.meetLink.startsWith('/')) {
+                          router.push(selectedAppointment.meetLink)
+                        } else {
+                          window.open(selectedAppointment.meetLink, '_blank')
+                        }
                       } else {
-                        alert('Meeting link not set by admin yet')
+                        alert('Meeting link not available')
                       }
                     }}
                   >

@@ -235,8 +235,12 @@ export default function PatientDashboard() {
                           <Button
                             className="w-full"
                             onClick={() => {
-                              if ((appointment as any).meetLink) {
-                                window.open((appointment as any).meetLink, '_blank')
+                              if (appointment.meetLink) {
+                                if (appointment.meetLink.startsWith('/')) {
+                                  router.push(appointment.meetLink)
+                                } else {
+                                  window.open(appointment.meetLink, '_blank')
+                                }
                               } else {
                                 alert('Meet link will be available soon')
                               }

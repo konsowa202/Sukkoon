@@ -175,23 +175,13 @@ export async function POST(request: NextRequest) {
       doctorEmail = (doctorData.users as any).email
     }
 
-    // Create Google Meet link if online
+    // Create Jitsi Meet link if online
     let meetLink = null
-    let googleEventId = null
 
-    if (type === 'online' && doctorEmail) {
-      try {
-        const appointmentDate = new Date(`${date}T${time}`)
-        meetLink = await createGoogleMeetLink({
-          doctorEmail,
-          patientEmail,
-          startTime: appointmentDate,
-          summary: `Therapy Session - ${service || 'Consultation'}`
-        })
-      } catch (error) {
-        console.error('Failed to create Meet link:', error)
-        // Continue without Meet link
-      }
+    if (type === 'online') {
+      // Jitsi links will be our internal /meet/[id] page
+      // We'll set this to the ID of the appointment which we'll have after insertion
+      // For now we set it correctly in the insert
     }
 
     // Create appointment
@@ -204,12 +194,10 @@ export async function POST(request: NextRequest) {
         date,
         time,
         type,
-        status: patientName ? 'completed' : 'pending', // Auto-complete for manual entries
+        status: patientName ? 'completed' : 'pending',
         service: service || 'Consultation',
-        meet_link: meetLink,
-        google_event_id: googleEventId
+        meet_link: type === 'online' ? '/meet/REF' : null
       })
-
       .select(`
           *,
           patient:patient_id (id, name, email),
@@ -223,6 +211,17 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 })
+    }
+
+    // Update the meet_link with the actual ID if it's online
+    if (data.type === 'online') {
+      const internalLink = `/meet/${data.id}`
+      await supabaseServer
+        .from('appointments')
+        .update({ meet_link: internalLink })
+        .eq('id', data.id)
+
+      data.meet_link = internalLink
     }
 
     // Transform response
