@@ -122,7 +122,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
     }
 
-    const { appointmentId, amount, method, proofImageUrl } = await request.json()
+    const {
+      appointmentId,
+      amount,
+      method,
+      proofImageUrl,
+      promo_code_id,
+      original_amount,
+      discount_amount
+    } = await request.json()
 
     if (!appointmentId || typeof amount !== 'number' || !method) {
       return NextResponse.json(
@@ -146,7 +154,10 @@ export async function POST(request: NextRequest) {
           amount,
           method,
           status: 'pending',
-          proof_image_url: proofImageUrl || null
+          proof_image_url: proofImageUrl || null,
+          promo_code_id: promo_code_id || null,
+          original_amount: original_amount || amount,
+          discount_amount: discount_amount || 0
         })
         .select()
         .single()

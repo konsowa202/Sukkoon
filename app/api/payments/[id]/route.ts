@@ -35,20 +35,37 @@ export async function PATCH(
         verified_by: status !== 'pending' ? payload.userId : null
       }
 
-      // If approved, also update appointment status to confirmed
+      // If approved, also update appointment status to confirmed and increment promo use
       if (status === 'approved') {
-        // Get appointment ID from payment
+        // Get payment details
         const { data: payment } = await supabaseServer
           .from('payments')
-          .select('appointment_id')
+          .select('appointment_id, promo_code_id')
           .eq('id', resolvedParams.id)
           .single()
 
         if (payment) {
+          // 1. Confirm appointment
           await supabaseServer
             .from('appointments')
             .update({ status: 'confirmed' })
             .eq('id', payment.appointment_id)
+
+          // 2. Increment promo usage if applicable
+          if (payment.promo_code_id) {
+            const { data: promo } = await supabaseServer
+              .from('promo_codes')
+              .select('current_uses')
+              .eq('id', payment.promo_code_id)
+              .single()
+
+            if (promo) {
+              await supabaseServer
+                .from('promo_codes')
+                .update({ current_uses: (promo.current_uses || 0) + 1 })
+                .eq('id', payment.promo_code_id)
+            }
+          }
         }
       }
 
