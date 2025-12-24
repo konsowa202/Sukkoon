@@ -86,14 +86,22 @@ export default function MeetingPage() {
                         Leave Session
                     </Button>
                 </div>
-                <div className="h-[calc(100vh-250px)] min-h-[500px]">
+                <div className="h-[calc(100vh-250px)] min-h-[500px] relative">
                     <JitsiMeet
                         roomName={`Sukoon-${appointment.id}`}
                         userName={user?.name || "User"}
                         onLeave={handleLeave}
                     />
+                    {user?.role === 'doctor' && (
+                        <div className="absolute top-2 right-2 z-10 opacity-50 hover:opacity-100 transition-opacity">
+                            <div className="bg-slate-900/80 backdrop-blur p-2 rounded text-[10px] text-slate-400 border border-slate-800 max-w-[200px]">
+                                Note: If prompted for moderator login, please use your Google/GitHub account to start the session.
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
     )
 }
+```

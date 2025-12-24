@@ -25,9 +25,10 @@ export function JitsiMeet({ roomName, userName, onLeave }: JitsiMeetProps) {
         script.async = true
         script.onload = () => {
             if (containerRef.current && window.JitsiMeetExternalAPI) {
-                const domain = "meet.jit.si"
+                // Using a more open community instance to avoid mandatory moderator logins
+                const domain = "meet.ffmuc.net"
                 const options = {
-                    roomName: roomName,
+                    roomName: roomName.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, ''),
                     width: "100%",
                     height: "100%",
                     parentNode: containerRef.current,
@@ -36,6 +37,7 @@ export function JitsiMeet({ roomName, userName, onLeave }: JitsiMeetProps) {
                         startWithVideoMuted: true,
                         disableDeepLinking: true,
                         enableWelcomePage: false,
+                        prejoinPageEnabled: false, // Skip the "Asking to join" screen
                     },
                     interfaceConfigOverwrite: {
                         APP_NAME: "Sukoon",
