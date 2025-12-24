@@ -15,6 +15,7 @@ ALTER TABLE users ALTER COLUMN image_url TYPE TEXT;
 -- Robustly add/fix columns for doctors table
 ALTER TABLE doctors ADD COLUMN IF NOT EXISTS image_url TEXT;
 ALTER TABLE doctors ADD COLUMN IF NOT EXISTS google_maps_link TEXT;
+ALTER TABLE doctors ADD COLUMN IF NOT EXISTS commission_percent INTEGER DEFAULT 10 CHECK (commission_percent >= 0 AND commission_percent <= 100);
 ALTER TABLE doctors ALTER COLUMN image_url TYPE TEXT;
 
 -- ==========================================
@@ -61,6 +62,7 @@ CREATE TABLE IF NOT EXISTS doctors (
   is_verified BOOLEAN DEFAULT FALSE,
   google_calendar_enabled BOOLEAN DEFAULT FALSE,
   google_refresh_token TEXT,
+  commission_percent INTEGER DEFAULT 10 CHECK (commission_percent >= 0 AND commission_percent <= 100),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(user_id)

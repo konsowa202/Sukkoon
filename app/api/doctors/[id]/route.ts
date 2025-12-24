@@ -58,7 +58,8 @@ export async function GET(
       location: data.location,
       city: data.city,
       googleMapsLink: data.google_maps_link,
-      phone: data.users?.phone || ""
+      phone: data.users?.phone || "",
+      commissionPercent: data.commission_percent || 10
     }
 
     return NextResponse.json(doctor)
@@ -154,6 +155,7 @@ export async function PATCH(
     if (doctorFields.location !== undefined) dbFields.location = doctorFields.location
     if (doctorFields.city !== undefined) dbFields.city = doctorFields.city
     if (doctorFields.googleMapsLink !== undefined) dbFields.google_maps_link = doctorFields.googleMapsLink
+    if (isAdmin && doctorFields.commissionPercent !== undefined) dbFields.commission_percent = doctorFields.commissionPercent
 
     // Only allow admin to update verification status
     if (isAdmin && doctorFields.isVerified !== undefined) {

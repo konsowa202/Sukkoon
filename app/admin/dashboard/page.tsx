@@ -29,6 +29,7 @@ export default function AdminDashboard() {
   const [cases, setCases] = useState<any[]>([])
   const [topics, setTopics] = useState<any[]>([])
   const [promoCodes, setPromoCodes] = useState<any[]>([])
+  const [payments, setPayments] = useState<any[]>([])
   const [stats, setStats] = useState({ totalDoctors: 0, totalPatients: 0, activeCases: 0, revenue: 0 })
   const [loading, setLoading] = useState(true)
 
@@ -38,7 +39,7 @@ export default function AdminDashboard() {
   const [activeChat, setActiveChat] = useState<any>(null)
   const { toast } = useToast()
 
-  const [formData, setFormData] = useState<any>({ availability: {}, languages: ['Arabic', 'English'], gender: 'male', consultationType: 'both' })
+  const [formData, setFormData] = useState<any>({ availability: {}, languages: ['Arabic', 'English'], gender: 'male', consultationType: 'both', commissionPercent: 10 })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [generatedCredentials, setGeneratedCredentials] = useState<{ email: string, password: string } | null>(null)
 
@@ -85,6 +86,7 @@ export default function AdminDashboard() {
 
       setDoctors(doctorsData)
       setPromoCodes(promoData)
+      setPayments(paymentsData)
 
       setPatients(patientsData.map((u: any) => ({
         id: u.id,
@@ -233,7 +235,8 @@ export default function AdminDashboard() {
       languages: entity.languages || ['Arabic', 'English'],
       city: entity.city,
       location: entity.location,
-      consultationType: entity.consultationType
+      consultationType: entity.consultationType,
+      commissionPercent: entity.commissionPercent || 10
     })
     setEntityType(type)
     setDialogType("edit")
@@ -451,7 +454,10 @@ export default function AdminDashboard() {
                 </div>
               </Card>
 
-              <Card className="p-6 text-foreground bg-card">
+              <Card className="p-6 text-foreground bg-card cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => {
+                const trigger = document.querySelector('[value="revenue"]') as HTMLElement;
+                if (trigger) trigger.click();
+              }}>
                 <div className="flex items-center gap-4">
                   <div className="p-3 bg-primary/10 rounded-lg shrink-0">
                     <DollarSign className="w-6 h-6 text-primary" />
@@ -479,6 +485,7 @@ export default function AdminDashboard() {
                 )}
               </TabsTrigger>
               <TabsTrigger value="promo" className="py-2">Promo Codes</TabsTrigger>
+              <TabsTrigger value="revenue" className="py-2">Revenue</TabsTrigger>
             </TabsList>
 
             {/* Pending Doctor Approvals */}
@@ -881,6 +888,61 @@ export default function AdminDashboard() {
                 </div>
               </Card>
             </TabsContent>
+
+            <TabsContent value="revenue" className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold">Revenue Breakdown by Doctor</h2>
+                <div className="text-right">
+                  <p className="text-sm text-muted-foreground">Total Platform Revenue</p>
+                  <p className="text-xl font-bold text-primary">${stats.revenue.toLocaleString()}</p>
+                </div>
+              </div>
+              <Card>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="border-b border-border">
+                      <tr>
+                        <th className="text-left p-4 font-semibold">Doctor Name</th>
+                        <th className="text-left p-4 font-semibold">Commission %</th>
+                        <th className="text-left p-4 font-semibold">Total Earned (Gross)</th>
+                        <th className="text-left p-4 font-semibold">Platform Share</th>
+                        <th className="text-left p-4 font-semibold">Net to Doctor</th>
+                        <th className="text-right p-4 font-semibold">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {doctors.map((doctor) => {
+                        const doctorPayments = payments.filter(p => p.status === 'approved' && p.appointment?.doctor?.id === doctor.id)
+                        const grossEarned = doctorPayments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0)
+                        const platformShare = (grossEarned * (doctor.commissionPercent || 10)) / 100
+                        const netToDoctor = grossEarned - platformShare
+
+                        return (
+                          <tr key={doctor.id} className="border-b border-border hover:bg-muted/30 transition-colors">
+                            <td className="p-4 font-medium">{doctor.name}</td>
+                            <td className="p-4 text-sm font-semibold text-primary">{doctor.commissionPercent || 10}%</td>
+                            <td className="p-4 text-sm font-bold">${grossEarned.toLocaleString()}</td>
+                            <td className="p-4 text-sm text-orange-500 font-bold">${platformShare.toLocaleString()}</td>
+                            <td className="p-4 text-sm text-green-500 font-bold">${netToDoctor.toLocaleString()}</td>
+                            <td className="p-4 text-right">
+                              <Button size="sm" variant="outline" onClick={() => handleEditEntity(doctor, "doctor")}>
+                                Update Commission
+                              </Button>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="p-8 text-center bg-muted/20">
+                  <p className="text-sm text-muted-foreground">
+                    <ShieldAlert className="w-4 h-4 inline mr-2 text-orange-500" />
+                    Individual doctor revenue tracking is being initialized. Please ensure all payments are approved in the Payment Verification section.
+                  </p>
+                </div>
+              </Card>
+            </TabsContent>
           </Tabs>
         </div>
       </div>
@@ -1062,6 +1124,10 @@ export default function AdminDashboard() {
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Price Offline (EGP)</label>
                   <Input type="number" value={formData.priceOffline || ''} onChange={e => setFormData({ ...formData, priceOffline: e.target.value })} placeholder="700" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Commission % (Platform Share)</label>
+                  <Input type="number" value={formData.commissionPercent || 10} onChange={e => setFormData({ ...formData, commissionPercent: parseInt(e.target.value) })} placeholder="10" min="0" max="100" />
                 </div>
                 <div className="col-span-2 space-y-2">
                   <label className="text-sm font-medium">Location / Address</label>

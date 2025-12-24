@@ -95,14 +95,15 @@ function DoctorDashboardContent() {
         fetch('/api/doctors/me', { headers })
       ])
 
+      let profile = null
       if (profileRes.ok) {
-        const profile = await profileRes.json()
+        profile = await profileRes.json()
         setDoctorData(profile)
       }
 
       let appointmentData: Appointment[] = []
       if (appointmentsRes.ok) {
-        appointmentData = await appointmentsRes.ok ? await appointmentsRes.json() : []
+        appointmentData = await appointmentsRes.json()
         setAppointments(appointmentData)
       }
 
@@ -113,10 +114,14 @@ function DoctorDashboardContent() {
           .filter((p: any) => p.status === 'approved')
           .reduce((sum: number, p: any) => sum + (Number(p.amount) || 0), 0)
 
+        const commissionPercent = profile?.commissionPercent || 10
+        const netEarnings = totalEarnings * (1 - commissionPercent / 100)
+
         const uniquePatients = new Set(appointmentData.map(a => a.patientId)).size
 
         setStats({
           totalEarnings,
+          netEarnings,
           totalPatients: uniquePatients,
           thisMonthSessions: appointmentData.filter(a => {
             const date = new Date(a.date)
@@ -133,7 +138,7 @@ function DoctorDashboardContent() {
     }
   }
 
-  const [stats, setStats] = useState({ totalEarnings: 0, totalPatients: 0, thisMonthSessions: 0, completedSessions: 0 })
+  const [stats, setStats] = useState({ totalEarnings: 0, netEarnings: 0, totalPatients: 0, thisMonthSessions: 0, completedSessions: 0 })
 
   const calculateCompletion = (data: any) => {
     if (!data) return 0
@@ -342,8 +347,9 @@ function DoctorDashboardContent() {
                     <DollarSign className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Total Earnings</p>
-                    <p className="text-2xl font-bold">${stats.totalEarnings.toLocaleString()}</p>
+                    <p className="text-sm text-muted-foreground">Due to you (Net)</p>
+                    <p className="text-2xl font-bold">${stats.netEarnings.toLocaleString()}</p>
+                    <p className="text-[10px] text-muted-foreground mt-1">Total Revenue: ${stats.totalEarnings.toLocaleString()}</p>
                   </div>
                 </div>
               </Card>
@@ -391,7 +397,8 @@ function DoctorDashboardContent() {
                   <thead>
                     <tr className="border-b">
                       <th className="text-left p-2">Date</th>
-                      <th className="text-left p-2">Amount</th>
+                      <th className="text-left p-2">Amount (Gross)</th>
+                      <th className="text-left p-2">Your Share (Net)</th>
                       <th className="text-left p-2">Method</th>
                       <th className="text-left p-2">Status</th>
                     </tr>
@@ -403,7 +410,8 @@ function DoctorDashboardContent() {
                       payments.map(p => (
                         <tr key={p.id} className="border-b">
                           <td className="p-2 text-sm">{new Date(p.created_at).toLocaleDateString()}</td>
-                          <td className="p-2 font-bold">{p.amount} EGP</td>
+                          <td className="p-2 font-medium text-muted-foreground">${Number(p.amount).toLocaleString()}</td>
+                          <td className="p-2 font-bold text-green-500">${(Number(p.amount) * (1 - (doctorData?.commissionPercent || 10) / 100)).toLocaleString()}</td>
                           <td className="p-2 text-sm uppercase">{p.method.replace('_', ' ')}</td>
                           <td className="p-2">
                             <Badge variant={p.status === 'approved' ? 'default' : p.status === 'pending' ? 'secondary' : 'destructive'}>

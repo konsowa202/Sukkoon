@@ -113,7 +113,8 @@ export async function GET(request: NextRequest) {
       availability: d.availability || {},
       consultationType: d.consultation_type,
       location: d.location,
-      city: d.city
+      city: d.city,
+      commissionPercent: d.commission_percent || 10
     })) || []
 
     return NextResponse.json(doctors)
@@ -165,7 +166,8 @@ export async function POST(request: NextRequest) {
         location: body.location,
         city: body.city,
         availability: body.availability || {},
-        is_verified: body.isVerified || false
+        is_verified: body.isVerified || false,
+        commission_percent: body.commissionPercent || 10
       })
       .select()
       .single()

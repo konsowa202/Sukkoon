@@ -62,7 +62,8 @@ export async function GET(request: NextRequest) {
             city: data.city,
             googleMapsLink: data.google_maps_link,
             phone: data.users?.phone || "",
-            isVerified: data.is_verified
+            isVerified: data.is_verified,
+            commissionPercent: data.commission_percent || 10
         }
 
         return NextResponse.json(doctor)
