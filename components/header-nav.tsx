@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { Moon, Sun, Languages, User, LogOut, Menu, Star } from "lucide-react"
+import { Moon, Sun, Languages, User, LogOut, Menu, Star, Heart } from "lucide-react"
 import { useTheme } from "@/contexts/theme-context"
 import { useLanguage } from "@/contexts/language-context"
 import { useAuth } from "@/contexts/auth-context"
@@ -68,6 +68,10 @@ export function HeaderNav({ showAuth = true }: HeaderNavProps) {
       </Link>
       <Link href="/#about" className="text-sm font-medium text-muted-foreground hover:text-foreground transition">
         {t("nav.about")}
+      </Link>
+      <Link href="/donate" className="text-sm font-medium text-primary hover:text-primary/80 transition flex items-center gap-1">
+        <Heart className="w-4 h-4" />
+        {t("nav.donate")}
       </Link>
       <Button asChild variant="outline" className="w-full md:w-auto">
         <Link href="/patient/search">{t("nav.findDoctor")}</Link>
@@ -188,6 +192,12 @@ export function HeaderNav({ showAuth = true }: HeaderNavProps) {
                         <User className="w-4 h-4" />
                       </div>
                       {t("nav.about")}
+                    </Link>
+                    <Link href="/donate" className="flex items-center gap-3 text-base font-medium p-2 -mx-2 rounded-lg hover:bg-accent transition-colors text-primary">
+                      <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center text-primary">
+                        <Heart className="w-4 h-4" />
+                      </div>
+                      {t("nav.donate")}
                     </Link>
                     <Link href="/patient/search" className="flex items-center gap-3 text-base font-medium p-2 -mx-2 rounded-lg hover:bg-accent transition-colors">
                       <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center text-primary">
