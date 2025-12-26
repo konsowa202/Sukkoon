@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Brain, Users, Shield, Clock, CheckCircle, Star, ArrowRight, Heart, Facebook, Instagram, Youtube, Video } from "lucide-react"
+import { Brain, Users, Shield, Clock, CheckCircle, Star, ArrowRight, Heart, Facebook, Instagram, Youtube, Video, Linkedin } from "lucide-react"
 import { HeaderNav } from "@/components/header-nav"
 import { useLanguage } from "@/contexts/language-context"
 import { useAuth } from "@/contexts/auth-context"
@@ -282,6 +282,9 @@ function HomePageContent() {
                 </a>
                 <a href="https://youtube.com/@user-tp3ol6ci2p?si=dR-Aq78h08XCB99s" target="_blank" rel="noopener noreferrer" className="p-2 bg-primary/10 rounded-lg text-primary hover:bg-primary hover:text-white transition-all">
                   <Youtube className="w-5 h-5" />
+                </a>
+                <a href="https://www.linkedin.com/company/suukoon/?viewAsMember=true" target="_blank" rel="noopener noreferrer" className="p-2 bg-primary/10 rounded-lg text-primary hover:bg-primary hover:text-white transition-all">
+                  <Linkedin className="w-5 h-5" />
                 </a>
               </div>
             </div>
