@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Brain, Users, Shield, Clock, CheckCircle, Star, ArrowRight, Heart } from "lucide-react"
+import { Brain, Users, Shield, Clock, CheckCircle, Star, ArrowRight, Heart, Facebook, Instagram, Youtube, Video } from "lucide-react"
 import { HeaderNav } from "@/components/header-nav"
 import { useLanguage } from "@/contexts/language-context"
 import { useAuth } from "@/contexts/auth-context"
@@ -270,6 +270,20 @@ function HomePageContent() {
               <p className="text-sm text-muted-foreground">
                 Your trusted partner in mental wellness. Connect with professionals who care.
               </p>
+              <div className="flex gap-4 pt-2">
+                <a href="https://www.facebook.com/share/17LpSgJuMP/" target="_blank" rel="noopener noreferrer" className="p-2 bg-primary/10 rounded-lg text-primary hover:bg-primary hover:text-white transition-all">
+                  <Facebook className="w-5 h-5" />
+                </a>
+                <a href="https://www.instagram.com/sukoon.psych?igsh=YzlmdHhtM3VwYWVi" target="_blank" rel="noopener noreferrer" className="p-2 bg-primary/10 rounded-lg text-primary hover:bg-primary hover:text-white transition-all">
+                  <Instagram className="w-5 h-5" />
+                </a>
+                <a href="https://www.tiktok.com/@sukoon.psych?_r=1&_t=ZS-91Apaa2dPus" target="_blank" rel="noopener noreferrer" className="p-2 bg-primary/10 rounded-lg text-primary hover:bg-primary hover:text-white transition-all">
+                  <Video className="w-5 h-5" />
+                </a>
+                <a href="https://youtube.com/@user-tp3ol6ci2p?si=dR-Aq78h08XCB99s" target="_blank" rel="noopener noreferrer" className="p-2 bg-primary/10 rounded-lg text-primary hover:bg-primary hover:text-white transition-all">
+                  <Youtube className="w-5 h-5" />
+                </a>
+              </div>
             </div>
             <div className="space-y-4">
               <h4 className="font-semibold">For Patients</h4>
@@ -300,12 +314,12 @@ function HomePageContent() {
               <h4 className="font-semibold">Legal</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
-                  <Link href="#" className="hover:text-foreground">
+                  <Link href="/privacy" className="hover:text-foreground">
                     {t("footer.privacy")}
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-foreground">
+                  <Link href="/terms" className="hover:text-foreground">
                     {t("footer.terms")}
                   </Link>
                 </li>
