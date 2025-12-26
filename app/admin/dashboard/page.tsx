@@ -18,6 +18,9 @@ import { useToast } from "@/components/ui/use-toast"
 
 import { Skeleton } from "@/components/ui/skeleton"
 import { HeaderNav } from "@/components/header-nav"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { AvailabilityGrid } from "@/components/availability-grid"
 
 export default function AdminDashboard() {
   const { user, logout, isLoading } = useAuth()
@@ -237,9 +240,11 @@ export default function AdminDashboard() {
       languages: entity.languages || ['Arabic', 'English'],
       city: entity.city,
       location: entity.location,
-      consultationType: entity.consultationType,
+      consultationType: entity.consultationType || 'both',
       commissionPercent: entity.commissionPercent || 10,
-      image: entity.image || entity.image_url || ""
+      image: entity.image || entity.image_url || "",
+      availability: entity.availability || {},
+      googleMapsLink: entity.googleMapsLink || ""
     })
     setEntityType(type)
     setDialogType("edit")
@@ -1179,10 +1184,62 @@ export default function AdminDashboard() {
                   <Input type="number" value={formData.commissionPercent || 10} onChange={e => setFormData({ ...formData, commissionPercent: parseInt(e.target.value) })} placeholder="10" min="0" max="100" />
                 </div>
                 <div className="col-span-2 space-y-2">
-                  <label className="text-sm font-medium">Location / Address</label>
                   <Input value={formData.location || ''} onChange={e => setFormData({ ...formData, location: e.target.value })} placeholder="Clinic address details" />
                 </div>
-                <div className="col-span-2 space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Google Maps Link</label>
+                  <Input value={formData.googleMapsLink || ''} onChange={e => setFormData({ ...formData, googleMapsLink: e.target.value })} placeholder="https://maps.google.com/..." />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Gender</label>
+                  <Select
+                    value={formData.gender || 'male'}
+                    onValueChange={(value) => setFormData({ ...formData, gender: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="male">Male</SelectItem>
+                      <SelectItem value="female">Female</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Consultation Type</label>
+                  <Select
+                    value={formData.consultationType || 'both'}
+                    onValueChange={(value) => setFormData({ ...formData, consultationType: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="online">Online Only</SelectItem>
+                      <SelectItem value="offline">In-Person Only</SelectItem>
+                      <SelectItem value="both">Both</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="col-span-2 space-y-2">
+                  <label className="text-sm font-medium">Languages (Comma separated)</label>
+                  <Input
+                    value={formData.languages?.join(', ') || ''}
+                    onChange={e => setFormData({
+                      ...formData,
+                      languages: e.target.value.split(',').map(l => l.trim()).filter(l => l)
+                    })}
+                    placeholder="Arabic, English, French"
+                  />
+                </div>
+                <div className="col-span-2 space-y-2 pt-4 border-t">
+                  <label className="text-sm font-bold block mb-4">Weekly Availability Schedule</label>
+                  <AvailabilityGrid
+                    availability={formData.availability || {}}
+                    onChange={(newAvailability) => setFormData({ ...formData, availability: newAvailability })}
+                  />
+                </div>
+                <div className="col-span-2 space-y-4 pt-4 border-t">
                   <label className="text-sm font-medium">Profile Image</label>
                   <div className="flex items-center gap-6">
                     <div className="relative group w-24 h-24">
