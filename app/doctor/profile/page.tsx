@@ -218,19 +218,37 @@ export default function DoctorProfilePage() {
     if (!data) return 0
     const fields = [
       { key: 'specialization', weight: 15 },
-      { key: 'bio', weight: 20 },
+      { key: 'bio', weight: 15 },
       { key: 'image', weight: 15, custom: (v: any) => v && v !== '/placeholder.svg' },
-      { key: 'priceOnline', weight: 10, custom: (v: any) => v > 0 },
       { key: 'gender', weight: 10 },
       { key: 'city', weight: 10 },
       { key: 'languages', weight: 10, custom: (v: any) => v && v.length > 0 },
       { key: 'availability', weight: 10, custom: (v: any) => v && Object.keys(v).length > 0 },
     ]
 
+    const type = data.consultationType || "both"
+    const typeConfigs: any = {
+      online: [
+        { key: 'priceOnline', weight: 15, custom: (v: any) => Number(v) > 0 }
+      ],
+      offline: [
+        { key: 'priceOffline', weight: 10, custom: (v: any) => Number(v) > 0 },
+        { key: 'location', weight: 5 }
+      ],
+      both: [
+        { key: 'priceOnline', weight: 5, custom: (v: any) => Number(v) > 0 },
+        { key: 'priceOffline', weight: 5, custom: (v: any) => Number(v) > 0 },
+        { key: 'location', weight: 5 }
+      ]
+    }
+
+    const modeFields = typeConfigs[type] || typeConfigs.both
+    const allFields = [...fields, ...modeFields]
+
     let score = 0
-    fields.forEach(f => {
+    allFields.forEach(f => {
       const val = data[f.key]
-      const isValid = f.custom ? f.custom(val) : !!val
+      const isValid = f.custom ? f.custom(val) : (val !== undefined && val !== null && val !== "")
       if (isValid) score += f.weight
     })
     return score
@@ -343,16 +361,18 @@ export default function DoctorProfilePage() {
                 />
                 {isEditing && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      className="h-8 w-8 rounded-full p-0"
-                      disabled={uploading}
-                      onClick={() => fileInputRef.current?.click()}
+                    <label
+                      htmlFor="profile-image-upload"
+                      className="cursor-pointer h-8 w-8 rounded-full bg-secondary flex items-center justify-center shadow-sm hover:bg-secondary/80 transition-colors"
+                      onClick={(e) => {
+                        // Force focus/click for some mobile browsers
+                        fileInputRef.current?.click();
+                      }}
                     >
                       {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
-                    </Button>
+                    </label>
                     <input
+                      id="profile-image-upload"
                       type="file"
                       ref={fileInputRef}
                       className="hidden"
@@ -433,8 +453,12 @@ export default function DoctorProfilePage() {
                     <Input
                       id="experience"
                       type="number"
-                      value={formData.experience}
-                      onChange={(e) => setFormData({ ...formData, experience: Number(e.target.value) })}
+                      inputMode="numeric"
+                      value={formData.experience === 0 && !isEditing ? 0 : formData.experience || ''}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setFormData({ ...formData, experience: val === '' ? '' as any : Number(val) })
+                      }}
                     />
                   </div>
                   <div className="space-y-2">
@@ -592,8 +616,12 @@ export default function DoctorProfilePage() {
                     <Input
                       id="priceOnline"
                       type="number"
-                      value={formData.priceOnline}
-                      onChange={(e) => setFormData({ ...formData, priceOnline: Number(e.target.value) })}
+                      inputMode="numeric"
+                      value={formData.priceOnline || ''}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setFormData({ ...formData, priceOnline: val === '' ? '' as any : Number(val) })
+                      }}
                       className="mt-2"
                     />
                   )}
@@ -615,8 +643,12 @@ export default function DoctorProfilePage() {
                     <Input
                       id="priceOffline"
                       type="number"
-                      value={formData.priceOffline}
-                      onChange={(e) => setFormData({ ...formData, priceOffline: Number(e.target.value) })}
+                      inputMode="numeric"
+                      value={formData.priceOffline || ''}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setFormData({ ...formData, priceOffline: val === '' ? '' as any : Number(val) })
+                      }}
                       className="mt-2"
                     />
                   )}

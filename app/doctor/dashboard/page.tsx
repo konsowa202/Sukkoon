@@ -145,19 +145,37 @@ function DoctorDashboardContent() {
     if (!data) return 0
     const fields = [
       { key: 'specialization', weight: 15 },
-      { key: 'bio', weight: 20 },
+      { key: 'bio', weight: 15 },
       { key: 'image', weight: 15, custom: (v: any) => v && v !== '/placeholder.svg' },
-      { key: 'priceOnline', weight: 10, custom: (v: any) => v > 0 },
       { key: 'gender', weight: 10 },
       { key: 'city', weight: 10 },
       { key: 'languages', weight: 10, custom: (v: any) => v && v.length > 0 },
       { key: 'availability', weight: 10, custom: (v: any) => v && Object.keys(v).length > 0 },
     ]
 
+    const type = data.consultationType || "both"
+    const typeConfigs: any = {
+      online: [
+        { key: 'priceOnline', weight: 15, custom: (v: any) => Number(v) > 0 }
+      ],
+      offline: [
+        { key: 'priceOffline', weight: 10, custom: (v: any) => Number(v) > 0 },
+        { key: 'location', weight: 5 }
+      ],
+      both: [
+        { key: 'priceOnline', weight: 5, custom: (v: any) => Number(v) > 0 },
+        { key: 'priceOffline', weight: 5, custom: (v: any) => Number(v) > 0 },
+        { key: 'location', weight: 5 }
+      ]
+    }
+
+    const modeFields = typeConfigs[type] || typeConfigs.both
+    const allFields = [...fields, ...modeFields]
+
     let score = 0
-    fields.forEach(f => {
+    allFields.forEach(f => {
       const val = data[f.key]
-      const isValid = f.custom ? f.custom(val) : !!val
+      const isValid = f.custom ? f.custom(val) : (val !== undefined && val !== null && val !== "")
       if (isValid) score += f.weight
     })
     return score
