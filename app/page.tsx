@@ -12,6 +12,7 @@ import Image from "next/image"
 import { NumberCounter } from "@/components/number-counter"
 import { TestimonialsMarquee } from "@/components/testimonials-marquee"
 import { FeaturedDoctors } from "@/components/featured-doctors"
+import { WhatsAppButton } from "@/components/whatsapp-button"
 
 const Hero3D = dynamic(() => import("@/components/hero-3d").then((mod) => ({ default: mod.Hero3D })), {
   ssr: false,
@@ -321,6 +322,8 @@ function HomePageContent() {
           </div>
         </div>
       </footer>
+
+      <WhatsAppButton />
 
       <style jsx global>{`
         @keyframes float {

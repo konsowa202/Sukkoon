@@ -9,11 +9,18 @@ interface AvailabilityGridProps {
 
 export function AvailabilityGrid({ availability, onChange }: AvailabilityGridProps) {
     const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-    const slots = [
-        "08:00", "09:00", "10:00", "11:00", "12:00", "13:00",
-        "14:00", "15:00", "16:00", "17:00", "18:00", "19:00",
-        "20:00", "21:00", "22:00"
-    ]
+    const slots = Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`)
+
+    const format12h = (slot: string) => {
+        const [hourStr] = slot.split(':')
+        const hour = parseInt(hourStr)
+        const isPM = hour >= 12
+        const hour12 = hour % 12 || 12
+        // We'll use a simple check for language if needed, but for now ص/م is standard in the UI context
+        // and we can handle it via a prop or just use both if it's too complex to detect here.
+        // However, ص/م is highly requested.
+        return `${hour12}:00 ${isPM ? 'م' : 'ص'} | ${hour12}:00 ${isPM ? 'PM' : 'AM'}`
+    }
 
     const toggleSlot = (day: string, slot: string) => {
         const currentSlots = availability[day] || []
@@ -50,7 +57,7 @@ export function AvailabilityGrid({ availability, onChange }: AvailabilityGridPro
                 <tbody>
                     {slots.map((slot) => (
                         <tr key={slot} className="border-t border-border">
-                            <td className="p-1 md:p-2 text-[10px] md:text-sm text-muted-foreground">{slot}</td>
+                            <td className="p-1 md:p-2 text-[10px] md:text-sm text-muted-foreground whitespace-nowrap">{format12h(slot)}</td>
                             {days.map((day) => (
                                 <td key={`${day}-${slot}`} className="p-1 md:p-2 text-center">
                                     <Button

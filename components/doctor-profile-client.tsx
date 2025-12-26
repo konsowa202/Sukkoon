@@ -124,8 +124,19 @@ export function DoctorProfileClient({ doctor, doctorId, busySlotsInitial }: { do
 
     const getFilteredSlots = (dayName: string, dateStr: string) => {
         const rawSlots = doctor.availability?.[dayName] || []
+        const now = new Date()
+        const twentyFourHoursFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000)
+
         return rawSlots.filter(slot => {
             const formattedSlot = slot.includes(':') ? slot : `${slot}:00`
+            const [hour, minute] = formattedSlot.split(':').map(Number)
+            const slotDate = new Date(dateStr)
+            slotDate.setHours(hour, minute, 0, 0)
+
+            // 1. Check if it's at least 24 hours in the future
+            if (slotDate < twentyFourHoursFromNow) return false
+
+            // 2. Check if it's already booked
             return !busySlots.some(busy =>
                 busy.date === dateStr &&
                 busy.time.startsWith(formattedSlot.split(':')[0])
@@ -248,12 +259,26 @@ export function DoctorProfileClient({ doctor, doctorId, busySlotsInitial }: { do
             <Dialog open={bookingStep === "time"} onOpenChange={(open) => !open && setBookingStep(null)}>
                 <DialogContent>
                     <DialogHeader><DialogTitle>Select Time Slot</DialogTitle></DialogHeader>
-                    <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 pt-4">
-                        {availableSlots.map((slot) => (
-                            <Button key={slot} variant={selectedTime === slot ? "default" : "outline"} onClick={() => handleTimeSelect(slot)} disabled={bookingLoading}>
-                                {slot}
-                            </Button>
-                        ))}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-4">
+                        {availableSlots.map((slot) => {
+                            const [hourStr] = slot.split(':')
+                            const hour = parseInt(hourStr)
+                            const isPM = hour >= 12
+                            const hour12 = hour % 12 || 12
+                            const displayTime = `${hour12}:00 ${isPM ? (languageContext?.language === 'ar' ? 'م' : 'PM') : (languageContext?.language === 'ar' ? 'ص' : 'AM')}`
+
+                            return (
+                                <Button
+                                    key={slot}
+                                    variant={selectedTime === slot ? "default" : "outline"}
+                                    onClick={() => handleTimeSelect(slot)}
+                                    disabled={bookingLoading}
+                                    className="text-xs py-4 h-auto"
+                                >
+                                    {displayTime}
+                                </Button>
+                            )
+                        })}
                     </div>
                 </DialogContent>
             </Dialog>
