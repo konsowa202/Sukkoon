@@ -20,7 +20,7 @@ const Hero3D = dynamic(() => import("@/components/hero-3d").then((mod) => ({ def
 })
 
 function HomePageContent() {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const { user } = useAuth()
 
   const getDashboardPath = () => {
@@ -53,7 +53,7 @@ function HomePageContent() {
               </Button>
               {user ? (
                 <Button size="lg" variant="outline" asChild className="text-lg bg-transparent border-primary/20 hover:border-primary/50 transition-colors">
-                  <Link href={getDashboardPath()}>Go to Dashboard</Link>
+                  <Link href={getDashboardPath()}>{t("hero.dashboard")}</Link>
                 </Button>
               ) : (
                 <Button size="lg" variant="outline" asChild className="text-lg bg-transparent border-primary/20 hover:border-primary/50 transition-colors">
@@ -64,13 +64,13 @@ function HomePageContent() {
             <div className="flex items-center gap-6 pt-4">
               <div className="flex -space-x-3">
                 {[
-                  "https://i.pravatar.cc/150?u=1",
-                  "https://i.pravatar.cc/150?u=2",
-                  "https://i.pravatar.cc/150?u=3",
-                  "https://i.pravatar.cc/150?u=4"
+                  "https://mshbiqfmfomofvksicth.supabase.co/storage/v1/object/public/doctor-images/1735158655075-omar-ahmed.jpg",
+                  "https://mshbiqfmfomofvksicth.supabase.co/storage/v1/object/public/doctor-images/1735158580004-eslam-abd-elhakeem.jpg",
+                  "https://mshbiqfmfomofvksicth.supabase.co/storage/v1/object/public/doctor-images/1735160241031-amar-yasser-salah.jpg",
+                  "https://mshbiqfmfomofvksicth.supabase.co/storage/v1/object/public/doctor-images/1735160416805-nour-ahmed.jpg"
                 ].map((url, i) => (
-                  <div key={i} className="w-12 h-12 rounded-full border-4 border-background overflow-hidden animate-float" style={{ animationDelay: `${i * 0.2}s` }}>
-                    <Image src={url} alt={`User ${i}`} width={48} height={48} className="object-cover" />
+                  <div key={i} className="w-12 h-12 rounded-full border-4 border-background overflow-hidden animate-float bg-muted" style={{ animationDelay: `${i * 0.2}s` }}>
+                    <Image src={url} alt={`Doctor ${i}`} width={48} height={48} className="object-cover" />
                   </div>
                 ))}
               </div>
@@ -80,7 +80,7 @@ function HomePageContent() {
                     <Star key={i} className="w-4 h-4 fill-current" />
                   ))}
                 </div>
-                <p className="text-muted-foreground font-medium">Trusted by 10,000+ users</p>
+                <p className="text-muted-foreground font-medium">{t("hero.trusted")}</p>
               </div>
             </div>
           </div>
@@ -106,19 +106,19 @@ function HomePageContent() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           <Card className="p-8 text-center border-none shadow-xl bg-gradient-to-b from-card to-background hover:scale-105 transition-transform">
             <div className="text-4xl font-black text-primary mb-2">
-              <NumberCounter end={500} suffix="+" />
+              <NumberCounter end={50} suffix="+" />
             </div>
             <p className="text-xs uppercase tracking-widest text-muted-foreground font-bold">{t("stats.doctors")}</p>
           </Card>
           <Card className="p-8 text-center border-none shadow-xl bg-gradient-to-b from-card to-background hover:scale-105 transition-transform">
             <div className="text-4xl font-black text-primary mb-2">
-              <NumberCounter end={50} suffix="K+" />
+              <NumberCounter end={100} suffix="+" />
             </div>
             <p className="text-xs uppercase tracking-widest text-muted-foreground font-bold">{t("stats.patients")}</p>
           </Card>
           <Card className="p-8 text-center border-none shadow-xl bg-gradient-to-b from-card to-background hover:scale-105 transition-transform">
             <div className="text-4xl font-black text-primary mb-2">
-              <NumberCounter end={100} suffix="K+" />
+              <NumberCounter end={200} suffix="+" />
             </div>
             <p className="text-xs uppercase tracking-widest text-muted-foreground font-bold">{t("stats.sessions")}</p>
           </Card>
@@ -137,7 +137,7 @@ function HomePageContent() {
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-black mb-4 tracking-tight">{t("features.title")}</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Everything you need for your mental wellness journey in one platform
+              {t("features.subtitle")}
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -268,7 +268,7 @@ function HomePageContent() {
             <div className="space-y-4">
               <h3 className="font-semibold text-lg">Sukoon</h3>
               <p className="text-sm text-muted-foreground">
-                Your trusted partner in mental wellness. Connect with professionals who care.
+                {t("footer.description")}
               </p>
               <div className="flex gap-4 pt-2">
                 <a href="https://www.facebook.com/share/17LpSgJuMP/" target="_blank" rel="noopener noreferrer" className="p-2 bg-primary/10 rounded-lg text-primary hover:bg-primary hover:text-white transition-all">
@@ -289,32 +289,32 @@ function HomePageContent() {
               </div>
             </div>
             <div className="space-y-4">
-              <h4 className="font-semibold">For Patients</h4>
+              <h4 className="font-semibold">{t("footer.forPatients")}</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
                   <Link href="/patient/search" className="hover:text-foreground">
-                    Find a Doctor
+                    {t("footer.findDoctor")}
                   </Link>
                 </li>
                 <li>
                   <Link href="/signup?role=patient" className="hover:text-foreground">
-                    Patient Sign Up
+                    {t("footer.patientSignup")}
                   </Link>
                 </li>
               </ul>
             </div>
             <div className="space-y-4">
-              <h4 className="font-semibold">For Doctors</h4>
+              <h4 className="font-semibold">{t("footer.forDoctors")}</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
                   <Link href="/signup?role=doctor" className="hover:text-foreground">
-                    Join as Doctor
+                    {t("footer.joinAsDoctor")}
                   </Link>
                 </li>
               </ul>
             </div>
             <div className="space-y-4">
-              <h4 className="font-semibold">Legal</h4>
+              <h4 className="font-semibold">{t("footer.legal")}</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
                   <Link href="/privacy" className="hover:text-foreground">
@@ -334,8 +334,8 @@ function HomePageContent() {
               </ul>
             </div>
           </div>
-          <div className="border-t border-border pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-muted-foreground">© 2025 Sukoon. {t("footer.rights")}</p>
+          <div className="border-t border-border pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+            <p className="text-sm text-muted-foreground">© {language === 'ar' ? '٢٠٢٥ سكون' : '2025 Sukoon'}. {t("footer.rights")}</p>
           </div>
         </div>
       </footer>

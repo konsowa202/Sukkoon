@@ -10,9 +10,11 @@ import { Badge } from "@/components/ui/badge"
 import { type Doctor } from "@/lib/fallback-data"
 import { useLanguage } from "@/contexts/language-context"
 import { Skeleton } from "@/components/ui/skeleton"
+import { EGYPTIAN_GOVERNORATES, DOCTOR_SPECIALIZATIONS } from "@/lib/constants"
 
 export function FeaturedDoctors() {
-    const { t } = useLanguage()
+    const { t, language } = useLanguage()
+    const isAr = language === "ar"
     const [doctors, setDoctors] = useState<Doctor[]>([])
     const [loading, setLoading] = useState(true)
 
@@ -41,14 +43,14 @@ export function FeaturedDoctors() {
         <section className="container mx-auto px-4 py-20">
             <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
                 <div className="space-y-4">
-                    <h2 className="text-3xl md:text-5xl font-black tracking-tight">Top Rated Doctors</h2>
+                    <h2 className="text-3xl md:text-5xl font-black tracking-tight">{t("doctors.title")}</h2>
                     <p className="text-lg text-muted-foreground max-w-2xl">
-                        Meet our highly qualified specialists dedicated to your mental well-being
+                        {t("doctors.subtitle")}
                     </p>
                 </div>
                 <Button asChild variant="ghost" className="hidden md:flex gap-2 text-primary hover:text-primary hover:bg-primary/10">
-                    <Link href="/patient/search">
-                        View All Doctors <ArrowRight className="w-4 h-4" />
+                    <Link href="/patient/search" className="flex items-center gap-2">
+                        {t("doctors.viewAll")} <ArrowRight className={`w-4 h-4 ${isAr ? 'rotate-180' : ''}`} />
                     </Link>
                 </Button>
             </div>
@@ -80,62 +82,70 @@ export function FeaturedDoctors() {
                         </div>
                     ))
                 ) : (
-                    doctors.map((doctor) => (
-                        <div key={doctor.id} className="min-w-[280px] sm:min-w-[320px] md:min-w-0 snap-center">
-                            <Card className="h-full group hover:border-primary/50 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/5 border-none bg-card overflow-hidden">
-                                <div className="relative h-64 overflow-hidden">
-                                    <Image
-                                        src={doctor.image || "/placeholder.svg"}
-                                        alt={doctor.name}
-                                        fill
-                                        className="object-cover transition-transform duration-500 group-hover:scale-110"
-                                    />
-                                    <div className="absolute top-4 right-4">
-                                        <Badge className="bg-background/80 backdrop-blur text-foreground font-bold border-none">
-                                            <Star className="w-3 h-3 fill-yellow-500 text-yellow-500 mr-1" />
-                                            {doctor.rating}
-                                        </Badge>
-                                    </div>
-                                </div>
+                    doctors.map((doctor) => {
+                        const gov = EGYPTIAN_GOVERNORATES.find(g => g.en.toLowerCase() === doctor.city?.toLowerCase());
+                        const localizedCity = gov ? (isAr ? gov.ar : gov.en) : (doctor.city || (isAr ? "أونلاين" : "Online"));
 
-                                <div className="p-6 space-y-4">
-                                    <div>
-                                        <h3 className="text-xl font-bold group-hover:text-primary transition-colors">{doctor.name}</h3>
-                                        <p className="text-sm text-primary font-medium">{doctor.specialization}</p>
-                                    </div>
+                        const spec = DOCTOR_SPECIALIZATIONS.find(s => s.en.toLowerCase() === doctor.specialization?.toLowerCase());
+                        const localizedSpec = spec ? (isAr ? spec.ar : spec.en) : doctor.specialization;
 
-                                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                                        <div className="flex items-center gap-1">
-                                            <Globe className="w-3 h-3" />
-                                            {doctor.languages?.[0]} {doctor.languages?.length > 1 && `+${doctor.languages.length - 1}`}
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            <MapPin className="w-3 h-3" />
-                                            {doctor.city || "Online"}
+                        return (
+                            <div key={doctor.id} className="min-w-[280px] sm:min-w-[320px] md:min-w-0 snap-center">
+                                <Card className="h-full group hover:border-primary/50 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/5 border-none bg-card overflow-hidden">
+                                    <div className="relative h-64 overflow-hidden">
+                                        <Image
+                                            src={doctor.image || "/placeholder.svg"}
+                                            alt={doctor.name}
+                                            fill
+                                            className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                        />
+                                        <div className="absolute top-4 right-4">
+                                            <Badge className="bg-background/80 backdrop-blur text-foreground font-bold border-none">
+                                                <Star className="w-3 h-3 fill-yellow-500 text-yellow-500 mr-1" />
+                                                {doctor.rating}
+                                            </Badge>
                                         </div>
                                     </div>
 
-                                    <div className="pt-2 border-t flex items-center justify-between">
-                                        <div className="space-y-0.5">
-                                            <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Starting from</p>
-                                            <p className="text-lg font-black text-foreground">
-                                                {doctor.priceOnline} <span className="text-xs font-normal text-muted-foreground">EGP</span>
-                                            </p>
+                                    <div className="p-6 space-y-4">
+                                        <div>
+                                            <h3 className="text-xl font-bold group-hover:text-primary transition-colors">{doctor.name}</h3>
+                                            <p className="text-sm text-primary font-medium">{localizedSpec}</p>
                                         </div>
-                                        <Button size="sm" asChild className="shadow-lg shadow-primary/20">
-                                            <Link href={`/patient/doctor/${doctor.id}`}>Book Now</Link>
-                                        </Button>
+
+                                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                            <div className="flex items-center gap-1">
+                                                <Globe className="w-3 h-3" />
+                                                {doctor.languages?.[0]} {doctor.languages?.length > 1 && `+${doctor.languages.length - 1}`}
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <MapPin className="w-3 h-3" />
+                                                {localizedCity}
+                                            </div>
+                                        </div>
+
+                                        <div className="pt-2 border-t flex items-center justify-between">
+                                            <div className="space-y-0.5">
+                                                <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">{t("doctors.startingFrom")}</p>
+                                                <p className="text-lg font-black text-foreground">
+                                                    {doctor.priceOnline} <span className="text-xs font-normal text-muted-foreground">{t("currency.egp")}</span>
+                                                </p>
+                                            </div>
+                                            <Button size="sm" asChild className="shadow-lg shadow-primary/20">
+                                                <Link href={`/patient/doctor/${doctor.id}`}>{t("doctors.bookNow")}</Link>
+                                            </Button>
+                                        </div>
                                     </div>
-                                </div>
-                            </Card>
-                        </div>
-                    ))
+                                </Card>
+                            </div>
+                        )
+                    })
                 )}
             </div>
 
             <div className="mt-8 md:hidden">
                 <Button asChild variant="outline" className="w-full">
-                    <Link href="/patient/search">View All Doctors</Link>
+                    <Link href="/patient/search">{t("doctors.viewAll")}</Link>
                 </Button>
             </div>
 

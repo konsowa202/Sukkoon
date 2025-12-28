@@ -105,24 +105,24 @@ export function HeaderNav({ showAuth = true }: HeaderNavProps) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuLabel>{t("nav.myAccount")}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link href={getDashboardPath()} className="cursor-pointer">
-                    Dashboard
+                    {t("nav.dashboard")}
                   </Link>
                 </DropdownMenuItem>
                 {(user.role === "doctor" || user.role === "patient") && (
                   <DropdownMenuItem asChild>
                     <Link href={getProfilePath()} className="cursor-pointer">
-                      Profile
+                      {t("nav.profile")}
                     </Link>
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={logout} className="cursor-pointer text-red-600">
                   <LogOut className="w-4 h-4 mr-2" />
-                  Logout
+                  {t("nav.logout")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -174,7 +174,9 @@ export function HeaderNav({ showAuth = true }: HeaderNavProps) {
                 <div className="px-6 space-y-6">
                   {/* Primary Nav */}
                   <div className="space-y-4">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 mb-2">Explore</p>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 mb-2">
+                      {t("nav.explore")}
+                    </p>
                     <Link href="/#features" className="flex items-center gap-3 text-base font-medium p-2 -mx-2 rounded-lg hover:bg-accent transition-colors">
                       <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center text-primary">
                         <Star className="w-4 h-4" />
@@ -212,19 +214,19 @@ export function HeaderNav({ showAuth = true }: HeaderNavProps) {
                   {/* User Section */}
                   {user ? (
                     <div className="space-y-4">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 mb-2">My Account</p>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 mb-2">{t("nav.myAccount")}</p>
                       <Link href={getDashboardPath()} className="flex items-center gap-3 text-base font-medium p-2 -mx-2 rounded-lg hover:bg-accent transition-colors">
                         <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center text-primary">
                           <User className="w-4 h-4" />
                         </div>
-                        Dashboard
+                        {t("nav.dashboard")}
                       </Link>
                       {(user.role === "doctor" || user.role === "patient") && (
                         <Link href={getProfilePath()} className="flex items-center gap-3 text-base font-medium p-2 -mx-2 rounded-lg hover:bg-accent transition-colors">
                           <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center text-primary">
                             <User className="w-4 h-4" />
                           </div>
-                          Profile
+                          {t("nav.profile")}
                         </Link>
                       )}
                       <Button
@@ -235,7 +237,7 @@ export function HeaderNav({ showAuth = true }: HeaderNavProps) {
                         <div className="w-8 h-8 rounded-md bg-red-100 flex items-center justify-center text-red-600 mr-3">
                           <LogOut className="w-4 h-4" />
                         </div>
-                        Logout
+                        {t("nav.logout")}
                       </Button>
                     </div>
                   ) : (
@@ -254,7 +256,7 @@ export function HeaderNav({ showAuth = true }: HeaderNavProps) {
                 <Button variant="outline" className="w-full justify-between" onClick={toggleTheme}>
                   <div className="flex items-center gap-2">
                     {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-                    <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+                    <span>{theme === 'dark' ? t("nav.lightMode") : t("nav.darkMode")}</span>
                   </div>
                   <span className="text-xs text-muted-foreground uppercase">{theme}</span>
                 </Button>

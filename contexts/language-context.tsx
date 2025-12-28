@@ -20,6 +20,13 @@ const translations = {
     "nav.signup": "Sign Up",
     "nav.findDoctor": "Find a Doctor",
     "nav.donate": "Donate a Session",
+    "nav.explore": "Explore",
+    "nav.dashboard": "Dashboard",
+    "nav.profile": "Profile",
+    "nav.logout": "Logout",
+    "nav.myAccount": "My Account",
+    "nav.lightMode": "Light Mode",
+    "nav.darkMode": "Dark Mode",
 
     // Hero
     "hero.title": "Your Journey to Mental Wellness Starts Here",
@@ -148,6 +155,24 @@ const translations = {
     "profile.billing": "Billing Information",
     "profile.save": "Save Changes",
     "profile.cancel": "Cancel",
+
+    // Home Page Additional
+    "hero.dashboard": "Go to Dashboard",
+    "hero.trusted": "Trusted by 500+ users",
+    "features.subtitle": "Everything you need for your mental wellness journey in one platform",
+    "doctors.title": "Top Rated Doctors",
+    "doctors.subtitle": "Meet our highly qualified specialists dedicated to your mental well-being",
+    "doctors.viewAll": "View All Doctors",
+    "doctors.startingFrom": "Starting from",
+    "doctors.bookNow": "Book Now",
+    "doctors.online": "Online",
+    "footer.description": "Your trusted partner in mental wellness. Connect with professionals who care.",
+    "footer.forPatients": "For Patients",
+    "footer.findDoctor": "Find a Doctor",
+    "footer.patientSignup": "Patient Sign Up",
+    "footer.forDoctors": "For Doctors",
+    "footer.joinAsDoctor": "Join as Doctor",
+    "footer.legal": "Legal",
   },
   ar: {
     // Navigation
@@ -158,6 +183,13 @@ const translations = {
     "nav.signup": "التسجيل",
     "nav.findDoctor": "ابحث عن طبيب",
     "nav.donate": "تبرع بجلسة",
+    "nav.explore": "استكشف",
+    "nav.dashboard": "لوحة التحكم",
+    "nav.profile": "الملف الشخصي",
+    "nav.logout": "تسجيل الخروج",
+    "nav.myAccount": "حسابي",
+    "nav.lightMode": "الوضع الفاتح",
+    "nav.darkMode": "الوضع الداكن",
 
     // Hero
     "hero.title": "رحلتك نحو الصحة النفسية تبدأ هنا",
@@ -284,6 +316,24 @@ const translations = {
     "profile.billing": "بيانات الدفع (خاصة بالطبيب فقط)",
     "profile.save": "حفظ التعديلات",
     "profile.cancel": "إلغاء",
+
+    // Home Page Additional
+    "hero.dashboard": "ذهاب إلى لوحة التحكم",
+    "hero.trusted": "يثق بنا أكثر من ٥٠٠ مستخدم",
+    "features.subtitle": "كل ما تحتاجه لرحلة صحتك النفسية في منصة واحدة",
+    "doctors.title": "أفضل الأطباء لدينا",
+    "doctors.subtitle": "تعرف على متخصصينا المؤهلين تأهيلاً عالياً المكرسين لصحتك النفسية",
+    "doctors.viewAll": "عرض جميع الأطباء",
+    "doctors.startingFrom": "يبدأ من",
+    "doctors.bookNow": "احجز الآن",
+    "doctors.online": "أونلاين",
+    "footer.description": "شريكك الموثوق في الصحة النفسية. تواصل مع محترفين يهتمون بك.",
+    "footer.forPatients": "للمرضى",
+    "footer.findDoctor": "ابحث عن طبيب",
+    "footer.patientSignup": "تسجيل مريض",
+    "footer.forDoctors": "للأطباء",
+    "footer.joinAsDoctor": "انضم كطبيب",
+    "footer.legal": "قانوني",
   },
 }
 

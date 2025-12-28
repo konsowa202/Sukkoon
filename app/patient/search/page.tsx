@@ -117,6 +117,153 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue
 }
 
+const FilterContent = ({
+  isMobile = false,
+  t,
+  isAr,
+  searchTerm,
+  setSearchTerm,
+  specializationFilter,
+  setSpecializationFilter,
+  consultationTypeFilter,
+  setConsultationTypeFilter,
+  cityFilter,
+  setCityFilter,
+  genderFilter,
+  setGenderFilter,
+  priceRange,
+  setPriceRange
+}: {
+  isMobile?: boolean,
+  t: any,
+  isAr: boolean,
+  searchTerm: string,
+  setSearchTerm: (v: string) => void,
+  specializationFilter: string,
+  setSpecializationFilter: (v: string) => void,
+  consultationTypeFilter: string,
+  setConsultationTypeFilter: (v: string) => void,
+  cityFilter: string,
+  setCityFilter: (v: string) => void,
+  genderFilter: string,
+  setGenderFilter: (v: string) => void,
+  priceRange: string,
+  setPriceRange: (v: string) => void
+}) => (
+  <div className="space-y-6">
+    {!isMobile && (
+      <div className="mb-2">
+        <h3 className="font-semibold text-lg">{t("search.filterLabel")}</h3>
+      </div>
+    )}
+
+    <div className="space-y-2">
+      <Label htmlFor="search" className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">{t("search.nameLabel")}</Label>
+      <div className="relative">
+        <Search className={`${isAr ? 'right-3' : 'left-3'} absolute top-3 h-4 w-4 text-muted-foreground`} />
+        <Input
+          id="search"
+          placeholder={t("search.namePlaceholder")}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className={`${isAr ? 'pr-9' : 'pl-9'} bg-muted/30 border-none focus-visible:ring-1 focus-visible:ring-primary`}
+        />
+      </div>
+    </div>
+
+    <div className="space-y-2">
+      <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">{t("search.specLabel")}</Label>
+      <Select value={specializationFilter} onValueChange={setSpecializationFilter}>
+        <SelectTrigger className="bg-muted/30 border-none">
+          <SelectValue placeholder={t("search.allSpec")} />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">{t("search.allSpec")}</SelectItem>
+          {DOCTOR_SPECIALIZATIONS.map((spec) => (
+            <SelectItem key={spec.en} value={spec.en}>
+              {isAr ? spec.ar : spec.en}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+
+    <div className="space-y-2">
+      <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">{t("search.typeLabel")}</Label>
+      <Select value={consultationTypeFilter} onValueChange={setConsultationTypeFilter}>
+        <SelectTrigger className="bg-muted/30 border-none">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">{t("search.allTypes")}</SelectItem>
+          <SelectItem value="online">{t("search.onlineOnly")}</SelectItem>
+          <SelectItem value="offline">{t("search.offlineOnly")}</SelectItem>
+          <SelectItem value="both">{t("search.bothTypes")}</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+
+    {(consultationTypeFilter === "offline" ||
+      consultationTypeFilter === "all" ||
+      consultationTypeFilter === "both") && (
+        <div className="space-y-2">
+          <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">{t("search.cityLabel")}</Label>
+          <Select value={cityFilter} onValueChange={setCityFilter}>
+            <SelectTrigger className="bg-muted/30 border-none">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("search.cityLabel")} ( {t("search.anyGender")} )</SelectItem>
+              {EGYPTIAN_GOVERNORATES.map((gov) => (
+                <SelectItem key={gov.en} value={gov.en}>
+                  {isAr ? gov.ar : gov.en}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+    <div className="space-y-2">
+      <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">{t("search.genderLabel")}</Label>
+      <Select value={genderFilter} onValueChange={setGenderFilter}>
+        <SelectTrigger className="bg-muted/30 border-none">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">{t("search.anyGender")}</SelectItem>
+          <SelectItem value="male">{t("search.male")}</SelectItem>
+          <SelectItem value="female">{t("search.female")}</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+
+    <div className="space-y-2">
+      <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">{t("search.priceLabel")}</Label>
+      <Select value={priceRange} onValueChange={setPriceRange}>
+        <SelectTrigger className="bg-muted/30 border-none">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">{t("search.allPrices")}</SelectItem>
+          <SelectItem value="low">{t("search.price.budget")}</SelectItem>
+          <SelectItem value="medium">{t("search.price.value")}</SelectItem>
+          <SelectItem value="high">{t("search.price.premium")}</SelectItem>
+          <SelectItem value="very-high">{t("search.price.specialized")}</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+
+    {isMobile && (
+      <div className="pt-4 lg:hidden">
+        <SheetTrigger asChild>
+          <Button className="w-full">View Results</Button>
+        </SheetTrigger>
+      </div>
+    )}
+  </div>
+)
+
 export default function SearchDoctorsPage() {
   const [doctors, setDoctors] = useState<Doctor[]>([])
   const [loading, setLoading] = useState(true)
@@ -185,121 +332,6 @@ export default function SearchDoctorsPage() {
     }
   }, [debouncedSearchTerm, specializationFilter, genderFilter, priceRange, consultationTypeFilter, cityFilter])
 
-  const FilterContent = ({ isMobile = false }: { isMobile?: boolean }) => (
-    <div className="space-y-6">
-      {!isMobile && (
-        <div className="mb-2">
-          <h3 className="font-semibold text-lg">{t("search.filterLabel")}</h3>
-        </div>
-      )}
-
-      <div className="space-y-2">
-        <Label htmlFor="search" className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">{t("search.nameLabel")}</Label>
-        <div className="relative">
-          <Search className={`${isAr ? 'right-3' : 'left-3'} absolute top-3 h-4 w-4 text-muted-foreground`} />
-          <Input
-            id="search"
-            placeholder={t("search.namePlaceholder")}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className={`${isAr ? 'pr-9' : 'pl-9'} bg-muted/30 border-none focus-visible:ring-1 focus-visible:ring-primary`}
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">{t("search.specLabel")}</Label>
-        <Select value={specializationFilter} onValueChange={setSpecializationFilter}>
-          <SelectTrigger className="bg-muted/30 border-none">
-            <SelectValue placeholder={t("search.allSpec")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t("search.allSpec")}</SelectItem>
-            {DOCTOR_SPECIALIZATIONS.map((spec) => (
-              <SelectItem key={spec.en} value={spec.en}>
-                {isAr ? spec.ar : spec.en}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">{t("search.typeLabel")}</Label>
-        <Select value={consultationTypeFilter} onValueChange={setConsultationTypeFilter}>
-          <SelectTrigger className="bg-muted/30 border-none">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t("search.allTypes")}</SelectItem>
-            <SelectItem value="online">{t("search.onlineOnly")}</SelectItem>
-            <SelectItem value="offline">{t("search.offlineOnly")}</SelectItem>
-            <SelectItem value="both">{t("search.bothTypes")}</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {(consultationTypeFilter === "offline" ||
-        consultationTypeFilter === "all" ||
-        consultationTypeFilter === "both") && (
-          <div className="space-y-2">
-            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">{t("search.cityLabel")}</Label>
-            <Select value={cityFilter} onValueChange={setCityFilter}>
-              <SelectTrigger className="bg-muted/30 border-none">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t("search.cityLabel")} ( {t("search.anyGender")} )</SelectItem>
-                {EGYPTIAN_GOVERNORATES.map((gov) => (
-                  <SelectItem key={gov.en} value={gov.en}>
-                    {isAr ? gov.ar : gov.en}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-
-      <div className="space-y-2">
-        <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">{t("search.genderLabel")}</Label>
-        <Select value={genderFilter} onValueChange={setGenderFilter}>
-          <SelectTrigger className="bg-muted/30 border-none">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t("search.anyGender")}</SelectItem>
-            <SelectItem value="male">{t("search.male")}</SelectItem>
-            <SelectItem value="female">{t("search.female")}</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">{t("search.priceLabel")}</Label>
-        <Select value={priceRange} onValueChange={setPriceRange}>
-          <SelectTrigger className="bg-muted/30 border-none">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t("search.allPrices")}</SelectItem>
-            <SelectItem value="low">{t("search.price.budget")}</SelectItem>
-            <SelectItem value="medium">{t("search.price.value")}</SelectItem>
-            <SelectItem value="high">{t("search.price.premium")}</SelectItem>
-            <SelectItem value="very-high">{t("search.price.specialized")}</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {isMobile && (
-        <div className="pt-4 lg:hidden">
-          <SheetTrigger asChild>
-            <Button className="w-full">View Results</Button>
-          </SheetTrigger>
-        </div>
-      )}
-    </div>
-  )
-
   return (
     <div className="min-h-screen bg-background text-foreground">
       <HeaderNav showAuth={false} />
@@ -309,7 +341,22 @@ export default function SearchDoctorsPage() {
           {/* Desktop Filter Sidebar */}
           <aside className="hidden lg:block lg:w-72">
             <Card className="p-6 sticky top-24 border-none shadow-sm bg-card/50 backdrop-blur">
-              <FilterContent />
+              <FilterContent
+                t={t}
+                isAr={isAr}
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                specializationFilter={specializationFilter}
+                setSpecializationFilter={setSpecializationFilter}
+                consultationTypeFilter={consultationTypeFilter}
+                setConsultationTypeFilter={setConsultationTypeFilter}
+                cityFilter={cityFilter}
+                setCityFilter={setCityFilter}
+                genderFilter={genderFilter}
+                setGenderFilter={setGenderFilter}
+                priceRange={priceRange}
+                setPriceRange={setPriceRange}
+              />
             </Card>
           </aside>
 
@@ -336,7 +383,23 @@ export default function SearchDoctorsPage() {
                       <SheetTitle className="text-2xl font-bold">{t("search.filterLabel")}</SheetTitle>
                     </SheetHeader>
                     <div className="p-6 h-full overflow-y-auto pb-24">
-                      <FilterContent isMobile={true} />
+                      <FilterContent
+                        isMobile={true}
+                        t={t}
+                        isAr={isAr}
+                        searchTerm={searchTerm}
+                        setSearchTerm={setSearchTerm}
+                        specializationFilter={specializationFilter}
+                        setSpecializationFilter={setSpecializationFilter}
+                        consultationTypeFilter={consultationTypeFilter}
+                        setConsultationTypeFilter={setConsultationTypeFilter}
+                        cityFilter={cityFilter}
+                        setCityFilter={setCityFilter}
+                        genderFilter={genderFilter}
+                        setGenderFilter={setGenderFilter}
+                        priceRange={priceRange}
+                        setPriceRange={setPriceRange}
+                      />
                     </div>
                   </SheetContent>
                 </Sheet>
