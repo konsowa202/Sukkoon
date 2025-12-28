@@ -17,11 +17,11 @@ import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 import { HeaderNav } from "@/components/header-nav"
 import { Skeleton } from "@/components/ui/skeleton"
-import { EGYPTIAN_GOVERNORATES } from "@/lib/constants"
+import { EGYPTIAN_GOVERNORATES, DOCTOR_SPECIALIZATIONS } from "@/lib/constants"
 
 export default function DoctorProfilePage() {
   const { user, logout, isLoading: authLoading } = useAuth()
-  const { language } = useLanguage()
+  const { language, t } = useLanguage()
   const isAr = language === "ar"
   const router = useRouter()
   const { toast } = useToast()
@@ -435,7 +435,7 @@ export default function DoctorProfilePage() {
               ) : (
                 <div className="flex-1 grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Full Name</Label>
+                    <Label htmlFor="name">{t("profile.fullName")}</Label>
                     <Input
                       id="name"
                       value={formData.name}
@@ -444,16 +444,25 @@ export default function DoctorProfilePage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="specialization">Specialization</Label>
-                    <Input
-                      id="specialization"
+                    <Label htmlFor="specialization">{t("profile.specialization")}</Label>
+                    <Select
                       value={formData.specialization}
-                      onChange={(e) => setFormData({ ...formData, specialization: e.target.value })}
-                      placeholder="Psychiatrist"
-                    />
+                      onValueChange={(value) => setFormData({ ...formData, specialization: value })}
+                    >
+                      <SelectTrigger id="specialization" className="bg-muted/30 border-none">
+                        <SelectValue placeholder={t("search.allSpec")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {DOCTOR_SPECIALIZATIONS.map((spec) => (
+                          <SelectItem key={spec.en} value={spec.en}>
+                            {isAr ? spec.ar : spec.en}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="experience">Years of Experience</Label>
+                    <Label htmlFor="experience">{t("profile.experience")}</Label>
                     <Input
                       id="experience"
                       type="number"
@@ -466,7 +475,7 @@ export default function DoctorProfilePage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="gender">Gender</Label>
+                    <Label htmlFor="gender">{t("profile.gender")}</Label>
                     <Select
                       value={formData.gender}
                       onValueChange={(value: any) => setFormData({ ...formData, gender: value })}
@@ -475,13 +484,13 @@ export default function DoctorProfilePage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="male">Male</SelectItem>
-                        <SelectItem value="female">Female</SelectItem>
+                        <SelectItem value="male">{t("search.male")}</SelectItem>
+                        <SelectItem value="female">{t("search.female")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number</Label>
+                    <Label htmlFor="phone">{t("profile.phone")}</Label>
                     <Input
                       id="phone"
                       value={formData.phone}
@@ -490,7 +499,7 @@ export default function DoctorProfilePage() {
                     />
                   </div>
                   <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="languages">Languages (comma separated)</Label>
+                    <Label htmlFor="languages">{t("profile.languages")}</Label>
                     <Input
                       id="languages"
                       value={formData.languages.join(", ")}
@@ -505,7 +514,7 @@ export default function DoctorProfilePage() {
 
           {/* Bio */}
           <Card className="p-6">
-            <h3 className="text-xl font-semibold mb-4">About</h3>
+            <h3 className="text-xl font-semibold mb-4">{t("profile.bio")}</h3>
             {!isEditing ? (
               <p className="text-muted-foreground">{formData.bio}</p>
             ) : (
@@ -513,7 +522,7 @@ export default function DoctorProfilePage() {
                 value={formData.bio}
                 onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                 rows={4}
-                placeholder="Tell patients about your expertise and approach..."
+                placeholder={isAr ? "احكِ للمرضى عن خبرتك وطريقتك العلاجية..." : "Tell patients about your expertise and approach..."}
               />
             )}
           </Card>
@@ -548,26 +557,26 @@ export default function DoctorProfilePage() {
               {showOfflineFields && (
                 <>
                   <div>
-                    <Label htmlFor="location">Clinic Address</Label>
+                    <Label htmlFor="location">{t("profile.address")}</Label>
                     {!isEditing ? (
                       <div className="flex flex-col gap-2 mt-2">
                         <div className="flex items-start gap-2">
                           <MapPin className="w-5 h-5 text-primary mt-0.5" />
                           <div>
-                            <p className="font-medium">{formData.location || "Not set"}</p>
+                            <p className="font-medium">{formData.location || (isAr ? "غير محدد" : "Not set")}</p>
                             {formData.city && <p className="text-sm text-muted-foreground">{formData.city}</p>}
                           </div>
                         </div>
                         {formData.googleMapsLink && (
                           <Button variant="link" className="p-0 h-auto text-primary w-fit" onClick={() => window.open(formData.googleMapsLink, '_blank')}>
-                            View on Google Maps
+                            {isAr ? "عرض على الخريطة" : "View on Google Maps"}
                           </Button>
                         )}
                       </div>
                     ) : (
                       <div className="space-y-4 mt-2">
                         <div className="space-y-2">
-                          <Label htmlFor="location" className="text-xs uppercase font-bold text-muted-foreground">Address</Label>
+                          <Label htmlFor="location" className="text-xs uppercase font-bold text-muted-foreground">{t("profile.address")}</Label>
                           <Input
                             id="location"
                             value={formData.location}
@@ -576,7 +585,7 @@ export default function DoctorProfilePage() {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="city" className="text-xs uppercase font-bold text-muted-foreground">City</Label>
+                          <Label htmlFor="city" className="text-xs uppercase font-bold text-muted-foreground">{t("profile.city")}</Label>
                           <Select
                             value={formData.city}
                             onValueChange={(value) => setFormData({ ...formData, city: value })}

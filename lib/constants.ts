@@ -26,3 +26,13 @@ export const EGYPTIAN_GOVERNORATES = [
     { en: "Sohag", ar: "سوهاج" },
     { en: "Aswan", ar: "أسوان" },
 ]
+
+export const DOCTOR_SPECIALIZATIONS = [
+    { en: "Psychiatrist", ar: "طبيب نفسي" },
+    { en: "Psychologist", ar: "أخصائي نفسي" },
+    { en: "Clinical Psychologist", ar: "أخصائي نفسي إكلينيكي" },
+    { en: "Behavioral Therapist", ar: "معالج سلوكي" },
+    { en: "Couples Counselor", ar: "استشاري علاقات زوجية" },
+    { en: "Child Psychologist", ar: "أخصائي نفسي أطفال" },
+    { en: "Addiction Specialist", ar: "متخصص علاج إدمان" },
+]

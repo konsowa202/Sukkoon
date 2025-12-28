@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
       .from('doctors')
       .select(`
         *,
-        users!user_id (
+        users!inner!user_id (
           id,
           name,
           email,
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
         )
       `)
 
-    // Only show verified doctors unless admin or verified=false explicitly requested
+    // ... (logic for verified)
     if (verified === 'false' || verified === 'pending') {
       query = query.eq('is_verified', false)
     } else if (!isAdmin) {
@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
       query = query.ilike('city', city)
     }
     if (search) {
-      query = query.or(`specialization.ilike.%${search}%,bio.ilike.%${search}%`)
+      query = query.or(`specialization.ilike.%${search}%,bio.ilike.%${search}%,users.name.ilike.%${search}%`)
     }
     if (minPrice) {
       query = query.gte('price_online', parseFloat(minPrice))

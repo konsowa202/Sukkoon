@@ -22,7 +22,7 @@ import { HeaderNav } from "@/components/header-nav"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { AvailabilityGrid } from "@/components/availability-grid"
-import { EGYPTIAN_GOVERNORATES } from "@/lib/constants"
+import { EGYPTIAN_GOVERNORATES, DOCTOR_SPECIALIZATIONS } from "@/lib/constants"
 
 export default function AdminDashboard() {
   const { user, logout, isLoading } = useAuth()
@@ -1164,7 +1164,21 @@ export default function AdminDashboard() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Specialization</label>
-                  <Input value={formData.specialization || ''} onChange={e => setFormData({ ...formData, specialization: e.target.value })} required placeholder="Therapist, Psychiatrist..." />
+                  <Select
+                    value={formData.specialization || ''}
+                    onValueChange={(value) => setFormData({ ...formData, specialization: value })}
+                  >
+                    <SelectTrigger className="bg-muted/30 border-none">
+                      <SelectValue placeholder="Select Specialization" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {DOCTOR_SPECIALIZATIONS.map((spec) => (
+                        <SelectItem key={spec.en} value={spec.en}>
+                          {spec.en} / {spec.ar}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">City</label>
