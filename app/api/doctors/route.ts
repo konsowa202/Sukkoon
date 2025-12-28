@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
       }
     }
     if (city && city !== 'all') {
-      query = query.eq('city', city)
+      query = query.ilike('city', city)
     }
     if (search) {
       query = query.or(`specialization.ilike.%${search}%,bio.ilike.%${search}%`)

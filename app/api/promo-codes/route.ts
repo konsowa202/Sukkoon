@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
 
     const { data, error } = await supabase
         .from("promo_codes")
-        .select("*, doctor:doctor_id(name)")
+        .select("*, doctor:doctor_id(id, users:user_id(name))")
         .order("created_at", { ascending: false })
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })

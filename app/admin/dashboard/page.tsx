@@ -13,6 +13,7 @@ import { DollarSign, Users, UserPlus, LogOut, Check, X, Edit, Trash2, Plus, Sear
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
+import { useLanguage } from "@/contexts/language-context"
 import { ChatWindow } from "@/components/chat-window"
 import { useToast } from "@/components/ui/use-toast"
 
@@ -21,9 +22,11 @@ import { HeaderNav } from "@/components/header-nav"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { AvailabilityGrid } from "@/components/availability-grid"
+import { EGYPTIAN_GOVERNORATES } from "@/lib/constants"
 
 export default function AdminDashboard() {
   const { user, logout, isLoading } = useAuth()
+  const { t } = useLanguage()
   const router = useRouter()
 
   const [pendingDoctors, setPendingDoctors] = useState<any[]>([])
@@ -117,8 +120,8 @@ export default function AdminDashboard() {
       })))
 
       const totalRevenue = paymentsData
-        .filter((p: any) => p.status === 'approved')
-        .reduce((sum: number, p: any) => sum + (Number(p.amount) || 0), 0)
+        .filter((p: any) => p.status?.toLowerCase() === 'approved')
+        .reduce((sum: number, p: any) => sum + (parseFloat(p.amount?.toString()) || 0), 0)
 
       setStats({
         totalDoctors: doctorsData.length,
@@ -518,7 +521,7 @@ export default function AdminDashboard() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Revenue</p>
-                    <p className="text-2xl font-bold">${stats.revenue.toLocaleString()}</p>
+                    <p className="text-2xl font-bold">{stats.revenue.toLocaleString()} {t("currency.egp")}</p>
                   </div>
                 </div>
               </Card>
@@ -526,20 +529,20 @@ export default function AdminDashboard() {
           )}
 
           <Tabs defaultValue="pending" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 mb-8">
-              <TabsTrigger value="pending" className="py-2">Pending</TabsTrigger>
-              <TabsTrigger value="doctors" className="py-2">Doctors</TabsTrigger>
-              <TabsTrigger value="patients" className="py-2">Patients</TabsTrigger>
-              <TabsTrigger value="cases" className="py-2">Cases</TabsTrigger>
-              <TabsTrigger value="topics" className="py-2">Topics</TabsTrigger>
-              <TabsTrigger value="requests" className="py-2 relative">
+            <TabsList className="flex flex-wrap h-auto w-full p-1 bg-muted/20 gap-1 rounded-xl mb-8">
+              <TabsTrigger value="pending" className="flex-1 min-w-[100px] py-2.5 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Pending</TabsTrigger>
+              <TabsTrigger value="doctors" className="flex-1 min-w-[100px] py-2.5 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Doctors</TabsTrigger>
+              <TabsTrigger value="patients" className="flex-1 min-w-[100px] py-2.5 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Patients</TabsTrigger>
+              <TabsTrigger value="cases" className="flex-1 min-w-[100px] py-2.5 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Cases</TabsTrigger>
+              <TabsTrigger value="topics" className="flex-1 min-w-[100px] py-2.5 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Topics</TabsTrigger>
+              <TabsTrigger value="requests" className="flex-1 min-w-[100px] py-2.5 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground relative">
                 Requests
                 {cases.filter(c => c.request_type).length > 0 && (
                   <span className="absolute -top-1 -right-1 w-2 h-2 bg-destructive rounded-full" />
                 )}
               </TabsTrigger>
-              <TabsTrigger value="promo" className="py-2">Promo Codes</TabsTrigger>
-              <TabsTrigger value="revenue" className="py-2">Revenue</TabsTrigger>
+              <TabsTrigger value="promo" className="flex-1 min-w-[100px] py-2.5 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Promo Codes</TabsTrigger>
+              <TabsTrigger value="revenue" className="flex-1 min-w-[100px] py-2.5 rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Revenue</TabsTrigger>
             </TabsList>
 
             {/* Pending Doctor Approvals */}
@@ -948,7 +951,7 @@ export default function AdminDashboard() {
                 <h2 className="text-xl font-semibold">Revenue Breakdown by Doctor</h2>
                 <div className="text-right">
                   <p className="text-sm text-muted-foreground">Total Platform Revenue</p>
-                  <p className="text-xl font-bold text-primary">${stats.revenue.toLocaleString()}</p>
+                  <p className="text-xl font-bold text-primary">{stats.revenue.toLocaleString()} {t("currency.egp")}</p>
                 </div>
               </div>
               <Card>
@@ -966,7 +969,7 @@ export default function AdminDashboard() {
                     </thead>
                     <tbody>
                       {doctors.map((doctor) => {
-                        const doctorPayments = payments.filter(p => p.status === 'approved' && p.appointment?.doctor?.id === doctor.id)
+                        const doctorPayments = payments.filter(p => p.status?.toLowerCase() === 'approved' && (p.doctorId === doctor.id || p.appointment?.doctor?.id === doctor.id))
                         const grossEarned = doctorPayments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0)
                         const platformShare = (grossEarned * (doctor.commissionPercent || 10)) / 100
                         const netToDoctor = grossEarned - platformShare
@@ -975,9 +978,9 @@ export default function AdminDashboard() {
                           <tr key={doctor.id} className="border-b border-border hover:bg-muted/30 transition-colors">
                             <td className="p-4 font-medium">{doctor.name}</td>
                             <td className="p-4 text-sm font-semibold text-primary">{doctor.commissionPercent || 10}%</td>
-                            <td className="p-4 text-sm font-bold">${grossEarned.toLocaleString()}</td>
-                            <td className="p-4 text-sm text-orange-500 font-bold">${platformShare.toLocaleString()}</td>
-                            <td className="p-4 text-sm text-green-500 font-bold">${netToDoctor.toLocaleString()}</td>
+                            <td className="p-4 text-sm font-bold">{grossEarned.toLocaleString()} {t("currency.egp")}</td>
+                            <td className="p-4 text-sm text-orange-500 font-bold">{platformShare.toLocaleString()} {t("currency.egp")}</td>
+                            <td className="p-4 text-sm text-green-500 font-bold">{netToDoctor.toLocaleString()} {t("currency.egp")}</td>
                             <td className="p-4 text-right">
                               <Button size="sm" variant="outline" onClick={() => handleEditEntity(doctor, "doctor")}>
                                 Update Commission
@@ -1165,7 +1168,21 @@ export default function AdminDashboard() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">City</label>
-                  <Input value={formData.city || ''} onChange={e => setFormData({ ...formData, city: e.target.value })} placeholder="Cairo, Alexandria..." />
+                  <Select
+                    value={formData.city || ''}
+                    onValueChange={(value) => setFormData({ ...formData, city: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select City" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {EGYPTIAN_GOVERNORATES.map((gov) => (
+                        <SelectItem key={gov.en} value={gov.en}>
+                          {gov.en} / {gov.ar}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Experience (Years)</label>
@@ -1386,6 +1403,23 @@ export default function AdminDashboard() {
                 onChange={e => setFormData({ ...formData, max_uses: parseInt(e.target.value) })}
                 required
               />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Doctor Restriction (Optional)</label>
+              <Select
+                value={formData.doctor_id || 'all'}
+                onValueChange={(value) => setFormData({ ...formData, doctor_id: value === 'all' ? null : value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="All Doctors" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Apply to All Doctors</SelectItem>
+                  {doctors.map(d => (
+                    <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             {formData.doctor_id && (
               <p className="text-xs text-muted-foreground italic">Restricted to selected doctor</p>

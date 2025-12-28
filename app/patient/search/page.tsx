@@ -15,6 +15,23 @@ import { HeaderNav } from "@/components/header-nav"
 import { useLanguage } from "@/contexts/language-context"
 import { useAuth } from "@/contexts/auth-context"
 import { Skeleton } from "@/components/ui/skeleton"
+import { EGYPTIAN_GOVERNORATES } from "@/lib/constants"
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value)
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value)
+    }, delay)
+
+    return () => {
+      clearTimeout(handler)
+    }
+  }, [value, delay])
+
+  return debouncedValue
+}
 
 export default function SearchDoctorsPage() {
   const [doctors, setDoctors] = useState<Doctor[]>([])
@@ -25,7 +42,9 @@ export default function SearchDoctorsPage() {
   const [priceRange, setPriceRange] = useState("all")
   const [consultationTypeFilter, setConsultationTypeFilter] = useState("all")
   const [cityFilter, setCityFilter] = useState("all")
-  const { t } = useLanguage()
+  const debouncedSearchTerm = useDebounce(searchTerm, 500)
+  const { t, language } = useLanguage()
+  const isAr = language === "ar"
   const { user, isLoading: authLoading } = useAuth()
 
   // Debug: Log auth state
@@ -47,7 +66,7 @@ export default function SearchDoctorsPage() {
       if (genderFilter !== 'all') params.append('gender', genderFilter)
       if (consultationTypeFilter !== 'all') params.append('consultationType', consultationTypeFilter)
       if (cityFilter !== 'all') params.append('city', cityFilter)
-      if (searchTerm) params.append('search', searchTerm)
+      if (debouncedSearchTerm) params.append('search', debouncedSearchTerm)
 
       if (priceRange === 'low') {
         params.append('minPrice', '150')
@@ -79,7 +98,7 @@ export default function SearchDoctorsPage() {
   // Auto-fetch doctors when filters change
   useEffect(() => {
     fetchDoctors()
-  }, [searchTerm, specializationFilter, genderFilter, priceRange, consultationTypeFilter, cityFilter])
+  }, [debouncedSearchTerm, specializationFilter, genderFilter, priceRange, consultationTypeFilter, cityFilter])
 
   const specializations = Array.from(new Set(doctors.map((d) => d.specialization).filter(Boolean)))
   const cities = Array.from(new Set(doctors.map((d) => d.city).filter(Boolean))) as string[]
@@ -148,10 +167,10 @@ export default function SearchDoctorsPage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Cities</SelectItem>
-                {cities.map((city) => (
-                  <SelectItem key={city} value={city!}>
-                    {city}
+                <SelectItem value="all">{isAr ? "جميع المحافظات" : "All Cities"}</SelectItem>
+                {EGYPTIAN_GOVERNORATES.map((gov) => (
+                  <SelectItem key={gov.en} value={gov.en}>
+                    {isAr ? gov.ar : gov.en}
                   </SelectItem>
                 ))}
               </SelectContent>

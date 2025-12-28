@@ -12,13 +12,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { LogOut, Edit, Save, X, Star, Award, MapPin, Video, Loader2, Camera, Phone, Mail } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
+import { useLanguage } from "@/contexts/language-context"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 import { HeaderNav } from "@/components/header-nav"
 import { Skeleton } from "@/components/ui/skeleton"
+import { EGYPTIAN_GOVERNORATES } from "@/lib/constants"
 
 export default function DoctorProfilePage() {
   const { user, logout, isLoading: authLoading } = useAuth()
+  const { language } = useLanguage()
+  const isAr = language === "ar"
   const router = useRouter()
   const { toast } = useToast()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -573,12 +577,21 @@ export default function DoctorProfilePage() {
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="city" className="text-xs uppercase font-bold text-muted-foreground">City</Label>
-                          <Input
-                            id="city"
+                          <Select
                             value={formData.city}
-                            onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                            placeholder="Cairo"
-                          />
+                            onValueChange={(value) => setFormData({ ...formData, city: value })}
+                          >
+                            <SelectTrigger id="city" className="bg-muted/30 border-none">
+                              <SelectValue placeholder={isAr ? "اختر المحافظة" : "Select City"} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {EGYPTIAN_GOVERNORATES.map((gov) => (
+                                <SelectItem key={gov.en} value={gov.en}>
+                                  {isAr ? gov.ar : gov.en}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="googleMapsLink" className="text-xs uppercase font-bold text-muted-foreground">Google Maps Link</Label>

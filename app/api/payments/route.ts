@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
               service,
               patient:patient_id (name),
               doctor:doctor_id (
+                id,
                 users:user_id (name)
               )
             )
@@ -43,12 +44,14 @@ export async function GET(request: NextRequest) {
         // Transform to flat names and camelCase for easier frontend use
         const transformed = data?.map((p: any) => ({
           ...p,
+          amount: Number(p.amount) || 0,
           appointmentId: p.appointment_id,
           proofImageUrl: p.proof_image_url,
           patientName: p.appointment?.patient?.name || 'Unknown',
           doctorName: p.appointment?.doctor?.users?.name || 'Dr. Unknown',
           appointmentDate: p.appointment?.date,
-          appointmentTime: p.appointment?.time
+          appointmentTime: p.appointment?.time,
+          doctorId: p.appointment?.doctor?.id
         })) || []
 
         return NextResponse.json(transformed)
@@ -68,6 +71,7 @@ export async function GET(request: NextRequest) {
             service,
             patient:patient_id (name),
             doctor:doctor_id (
+              id,
               users:user_id (name)
             )
           )
