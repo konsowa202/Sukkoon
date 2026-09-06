@@ -363,9 +363,17 @@ export default function SearchDoctorsPage() {
           <main className="flex-1">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight">{t("search.title")}</h1>
-                <p className="text-muted-foreground mt-1">
-                  {loading ? t("search.loading") : `${doctors.length} ${t("search.results")}`}
+                <h1 className="text-3xl font-bold tracking-tight mb-2">{t("search.title")}</h1>
+                <div className="flex flex-wrap items-center gap-3 text-sm font-medium">
+                  <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20 border-none">
+                    {t("search.pricing.therapist")}
+                  </Badge>
+                  <Badge variant="secondary" className="bg-secondary text-secondary-foreground hover:bg-secondary/80 border-none">
+                    {t("search.pricing.psychiatrist")}
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2 font-medium opacity-80">
+                  {t("search.pricing.note")}
                 </p>
               </div>
 

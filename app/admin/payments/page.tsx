@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { HeaderNav } from "@/components/header-nav"
-import { Check, X, Eye, Loader2 } from "lucide-react"
+import { Check, X, Eye, Loader2, Undo } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useRouter } from "next/navigation"
 
 interface Payment {
@@ -136,6 +137,29 @@ export default function PaymentsPage() {
     }
   }
 
+  const handleUndo = async (paymentId: string) => {
+    setProcessing(paymentId)
+    try {
+      const token = localStorage.getItem('sukoon_token')
+      const response = await fetch(`/api/payments/${paymentId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
+        },
+        body: JSON.stringify({ status: 'pending' })
+      })
+
+      if (response.ok) {
+        await fetchPayments()
+      }
+    } catch (error) {
+      console.error('Failed to undo payment:', error)
+    } finally {
+      setProcessing(null)
+    }
+  }
+
   useEffect(() => {
     if (!isLoading && (!user || user.role !== 'admin')) {
       router.push('/login')
@@ -149,6 +173,112 @@ export default function PaymentsPage() {
   const pendingPayments = payments.filter(p => p.status === 'pending')
   const approvedPayments = payments.filter(p => p.status === 'approved')
   const rejectedPayments = payments.filter(p => p.status === 'rejected')
+
+  const renderPaymentCard = (payment: Payment) => (
+    <Card key={payment.id} className="p-6">
+      <div className="flex flex-col md:flex-row gap-6 items-start">
+        <div className="flex-1 space-y-4">
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className={payment.status === 'approved' ? 'text-green-600 border-green-600' : payment.status === 'rejected' ? 'text-red-600 border-red-600' : ''}>
+              {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
+            </Badge>
+            <Badge variant="secondary" className="capitalize">
+              {payment.method.replace('_', ' ')}
+            </Badge>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Patient</p>
+              <p className="font-medium">{payment.patientName || 'Unknown'}</p>
+              <p className="text-sm text-muted-foreground">Amount: {payment.amount} EGP</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Session</p>
+              <p className="font-medium">{payment.doctorName || 'Dr. Unknown'}</p>
+              <p className="text-sm text-muted-foreground">
+                {payment.appointmentDate} at {payment.appointmentTime}
+              </p>
+            </div>
+          </div>
+
+          {payment.status === 'pending' && (
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Meeting Link (Optional)</p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="https://meet.google.com/xxx-xxxx-xxx"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  value={meetLinks[payment.appointmentId] || ''}
+                  onChange={(e) => setMeetLinks({ ...meetLinks, [payment.appointmentId]: e.target.value })}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-row md:flex-col gap-2 w-full md:w-auto pt-4 md:pt-0">
+          {payment.proofImageUrl && (
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => {
+                setSelectedPayment(payment)
+                setShowProof(true)
+              }}
+            >
+              <Eye className="w-4 h-4 mr-2" />
+              View Proof
+            </Button>
+          )}
+          {payment.status === 'pending' ? (
+            <>
+              <Button
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                onClick={() => handleApprove(payment.id)}
+                disabled={processing === payment.id}
+              >
+                {processing === payment.id ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>
+                    <Check className="w-4 h-4 mr-2" />
+                    Approve
+                  </>
+                )}
+              </Button>
+              <Button
+                variant="ghost"
+                className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                onClick={() => handleReject(payment.id)}
+                disabled={processing === payment.id}
+              >
+                <X className="w-4 h-4 mr-2" />
+                Reject
+              </Button>
+            </>
+          ) : (
+            <Button
+              variant="outline"
+              className="flex-1 text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+              onClick={() => handleUndo(payment.id)}
+              disabled={processing === payment.id}
+            >
+              {processing === payment.id ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <>
+                  <Undo className="w-4 h-4 mr-2" />
+                  Revert to Pending
+                </>
+              )}
+            </Button>
+          )}
+        </div>
+      </div>
+    </Card>
+  )
 
   return (
     <div className="min-h-screen bg-background">
@@ -182,95 +312,28 @@ export default function PaymentsPage() {
             <p>Loading payments...</p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {pendingPayments.length === 0 && !loading ? (
-              <Card className="p-12 text-center">
-                <p className="text-muted-foreground">No pending payments</p>
-              </Card>
-            ) : (
-              pendingPayments.map((payment) => (
-                <Card key={payment.id} className="p-6">
-                  <div className="flex flex-col md:flex-row gap-6 items-start">
-                    <div className="flex-1 space-y-4">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline">Pending</Badge>
-                        <Badge variant="secondary" className="capitalize">
-                          {payment.method.replace('_', ' ')}
-                        </Badge>
-                      </div>
-
-                      <div className="grid md:grid-cols-2 gap-4">
-                        <div>
-                          <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Patient</p>
-                          <p className="font-medium">{payment.patientName || 'Unknown'}</p>
-                          <p className="text-sm text-muted-foreground">Amount: {payment.amount} EGP</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Session</p>
-                          <p className="font-medium">{payment.doctorName || 'Dr. Unknown'}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {payment.appointmentDate} at {payment.appointmentTime}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Meeting Link (Optional)</p>
-                        <div className="flex gap-2">
-                          <input
-                            type="text"
-                            placeholder="https://meet.google.com/xxx-xxxx-xxx"
-                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                            value={meetLinks[payment.appointmentId] || ''}
-                            onChange={(e) => setMeetLinks({ ...meetLinks, [payment.appointmentId]: e.target.value })}
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-row md:flex-col gap-2 w-full md:w-auto pt-4 md:pt-0">
-                      {payment.proofImageUrl && (
-                        <Button
-                          variant="outline"
-                          className="flex-1"
-                          onClick={() => {
-                            setSelectedPayment(payment)
-                            setShowProof(true)
-                          }}
-                        >
-                          <Eye className="w-4 h-4 mr-2" />
-                          View Proof
-                        </Button>
-                      )}
-                      <Button
-                        className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-                        onClick={() => handleApprove(payment.id)}
-                        disabled={processing === payment.id}
-                      >
-                        {processing === payment.id ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <>
-                            <Check className="w-4 h-4 mr-2" />
-                            Approve
-                          </>
-                        )}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
-                        onClick={() => handleReject(payment.id)}
-                        disabled={processing === payment.id}
-                      >
-                        <X className="w-4 h-4 mr-2" />
-                        Reject
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              ))
-            )}
-          </div>
+          <Tabs defaultValue="pending" className="w-full">
+            <TabsList className="mb-6 grid w-full max-w-md grid-cols-3">
+              <TabsTrigger value="pending">Pending</TabsTrigger>
+              <TabsTrigger value="approved">Approved</TabsTrigger>
+              <TabsTrigger value="rejected">Rejected</TabsTrigger>
+            </TabsList>
+            <TabsContent value="pending" className="space-y-4">
+              {pendingPayments.length === 0 ? (
+                <Card className="p-12 text-center text-muted-foreground">No pending payments</Card>
+              ) : pendingPayments.map(renderPaymentCard)}
+            </TabsContent>
+            <TabsContent value="approved" className="space-y-4">
+              {approvedPayments.length === 0 ? (
+                <Card className="p-12 text-center text-muted-foreground">No approved payments</Card>
+              ) : approvedPayments.map(renderPaymentCard)}
+            </TabsContent>
+            <TabsContent value="rejected" className="space-y-4">
+              {rejectedPayments.length === 0 ? (
+                <Card className="p-12 text-center text-muted-foreground">No rejected payments</Card>
+              ) : rejectedPayments.map(renderPaymentCard)}
+            </TabsContent>
+          </Tabs>
         )}
       </div>
 

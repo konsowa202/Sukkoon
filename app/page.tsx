@@ -336,6 +336,7 @@ function HomePageContent() {
           </div>
           <div className="border-t border-border pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
             <p className="text-sm text-muted-foreground">© {language === 'ar' ? '٢٠٢٥ سكون' : '2025 Sukoon'}. {t("footer.rights")}</p>
+            <p className="text-sm font-semibold text-muted-foreground">Powered by <span className="text-primary font-bold">Gahbaz Tech</span></p>
           </div>
         </div>
       </footer>
