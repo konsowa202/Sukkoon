@@ -142,7 +142,7 @@ const translations = {
     "search.online": "Online",
     "search.offline": "In-Person",
     "search.exp": "y exp",
-    "search.viewProfile": "View Profile & Book",
+    "search.viewProfile": "View Profile",
 
     // Profile Page
     "profile.fullName": "Full Name",
@@ -306,7 +306,7 @@ const translations = {
     "search.online": "أونلاين",
     "search.offline": "في العيادة",
     "search.exp": "سنة خبرة",
-    "search.viewProfile": "عرض الصفحة والحجز",
+    "search.viewProfile": "عرض الصفحة",
 
     // Profile Page
     "profile.fullName": "الاسم الكامل",

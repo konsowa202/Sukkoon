@@ -34,71 +34,7 @@ export function DoctorProfileClient({ doctor, doctorId, busySlotsInitial }: { do
     const user = authContext?.user ?? null
 
     const handleBooking = () => {
-        if (!user) {
-            const message = encodeURIComponent("Please sign in to book an appointment.")
-            router.push(`/login?redirect=${encodeURIComponent(pathname || '')}&message=${message}`)
-            return
-        }
-        setError(null)
-        if (doctor.consultationType !== "both") {
-            setSelectedType(doctor.consultationType)
-            setBookingStep("date")
-        } else {
-            setBookingStep("type")
-        }
-    }
-
-    const handleTypeSelect = (type: "online" | "offline") => {
-        setSelectedType(type)
-        setBookingStep("date")
-    }
-
-    const handleDateSelect = (dayName: string, dateStr: string) => {
-        setSelectedDayName(dayName)
-        setSelectedDate(dateStr)
-        setBookingStep("time")
-    }
-
-    const handleTimeSelect = async (time: string) => {
-        if (!selectedType || !selectedDate || !user) return
-        setSelectedTime(time)
-        setBookingLoading(true)
-        setError(null)
-
-        try {
-            const token = localStorage.getItem('sukoon_token')
-            const response = await fetch('/api/appointments', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': token ? `Bearer ${token}` : ''
-                },
-                body: JSON.stringify({
-                    doctorId,
-                    date: selectedDate,
-                    time,
-                    type: selectedType,
-                    service: 'Consultation'
-                })
-            })
-
-            if (response.ok) {
-                const appointmentData = await response.json()
-                setBookingStep(null)
-                setShowSuccess(true)
-                setTimeout(() => {
-                    setShowSuccess(false)
-                    router.push(`/patient/appointment/${appointmentData.id}/payment`)
-                }, 1500)
-            } else {
-                const errorData = await response.json()
-                setError(errorData.error || 'Failed to book appointment')
-            }
-        } catch (error: any) {
-            setError('Failed to book appointment. Please try again.')
-        } finally {
-            setBookingLoading(false)
-        }
+        router.push('/#easy-book')
     }
 
     const getAvailableDates = () => {
@@ -211,8 +147,8 @@ export function DoctorProfileClient({ doctor, doctorId, busySlotsInitial }: { do
                     </Card>
 
                     {error && <div className="bg-destructive/10 text-destructive p-3 rounded-md text-sm mb-4">{error}</div>}
-                    <Button size="lg" className="w-full text-lg" onClick={handleBooking} disabled={availableDates.length === 0}>
-                        {availableDates.length === 0 ? "No Availability Currently" : "Book Appointment"}
+                    <Button size="lg" className="w-full text-lg shadow-lg shadow-primary/20 bg-gradient-to-r from-primary to-primary/80 hover:scale-[1.02] transition-transform" onClick={handleBooking}>
+                        {languageContext?.language === 'ar' ? 'احجز جلستك الآن (الحجز السريع)' : 'Book Session Now (Easy Book)'}
                     </Button>
                 </div>
             </div>

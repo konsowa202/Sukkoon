@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Brain, Users, Shield, Clock, CheckCircle, Star, ArrowRight, Heart, Facebook, Instagram, Youtube, Video, Linkedin } from "lucide-react"
+import { Brain, Users, Shield, Clock, CheckCircle, Star, ArrowRight, Heart, Facebook, Instagram, Youtube, Video, Linkedin, Smartphone, CreditCard, Upload, Copy } from "lucide-react"
 import { HeaderNav } from "@/components/header-nav"
 import { useLanguage } from "@/contexts/language-context"
 import { useAuth } from "@/contexts/auth-context"
@@ -166,7 +166,9 @@ function HomePageContent() {
                      patientName: formData.get('name'),
                      phone: formData.get('phone'),
                      type: 'online', // Default to online for easy book, can be changed later
-                     service: formData.get('consultation') === 'psychiatrist' ? 'طبيب نفسي' : 'أخصائي نفسي',
+                     service: (formData.get('consultation') as string).includes('psychiatrist') 
+                       ? ((formData.get('consultation') as string).includes('package') ? 'باقة 4 جلسات - طبيب نفسي' : 'طبيب نفسي - جلسة واحدة')
+                       : ((formData.get('consultation') as string).includes('package') ? 'باقة 4 جلسات - أخصائي نفسي' : 'أخصائي نفسي - جلسة واحدة'),
                      request_type: 'easy_book',
                      request_message: 'طلب حجز سريع من الصفحة الرئيسية'
                    })
@@ -197,22 +199,44 @@ function HomePageContent() {
                   <div className="grid md:grid-cols-2 gap-4">
                     <label className="cursor-pointer">
                       <input type="radio" name="consultation" value="therapist" className="peer sr-only" required />
-                      <div className="p-4 rounded-xl border-2 border-muted bg-background/50 peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+                      <div className="p-4 rounded-xl border-2 border-muted bg-background/50 peer-checked:border-primary peer-checked:bg-primary/5 transition-all h-full">
                         <div className="flex justify-between items-center mb-2">
-                          <h4 className="font-bold text-lg">أخصائي نفسي (Therapist)</h4>
+                          <h4 className="font-bold text-lg">أخصائي نفسي (جلسة واحدة)</h4>
                           <span className="bg-primary/20 text-primary px-3 py-1 rounded-full text-sm font-black">450 ج.م</span>
                         </div>
                         <p className="text-sm text-muted-foreground">للدعم النفسي، وتعديل السلوك، وجلسات العلاج الكلامي.</p>
                       </div>
                     </label>
                     <label className="cursor-pointer">
+                      <input type="radio" name="consultation" value="therapist_package" className="peer sr-only" required />
+                      <div className="p-4 rounded-xl border-2 border-muted bg-background/50 peer-checked:border-primary peer-checked:bg-primary/5 transition-all h-full relative overflow-hidden">
+                        <div className="absolute top-0 right-0 bg-yellow-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-lg">باقة التوفير</div>
+                        <div className="flex justify-between items-center mb-2 mt-1">
+                          <h4 className="font-bold text-lg">باقة 4 جلسات أخصائي</h4>
+                          <span className="bg-primary/20 text-primary px-3 py-1 rounded-full text-sm font-black">1800 ج.م</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground">باقة متكاملة للمتابعة المستمرة بأسعار خاصة.</p>
+                      </div>
+                    </label>
+                    <label className="cursor-pointer">
                       <input type="radio" name="consultation" value="psychiatrist" className="peer sr-only" required />
-                      <div className="p-4 rounded-xl border-2 border-muted bg-background/50 peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+                      <div className="p-4 rounded-xl border-2 border-muted bg-background/50 peer-checked:border-primary peer-checked:bg-primary/5 transition-all h-full">
                         <div className="flex justify-between items-center mb-2">
-                          <h4 className="font-bold text-lg">طبيب نفسي (Psychiatrist)</h4>
+                          <h4 className="font-bold text-lg">طبيب نفسي (جلسة واحدة)</h4>
                           <span className="bg-primary/20 text-primary px-3 py-1 rounded-full text-sm font-black">650 ج.م</span>
                         </div>
                         <p className="text-sm text-muted-foreground">للتشخيص الطبي، ووصف الأدوية ومتابعة الحالات الإكلينيكية.</p>
+                      </div>
+                    </label>
+                    <label className="cursor-pointer">
+                      <input type="radio" name="consultation" value="psychiatrist_package" className="peer sr-only" required />
+                      <div className="p-4 rounded-xl border-2 border-muted bg-background/50 peer-checked:border-primary peer-checked:bg-primary/5 transition-all h-full relative overflow-hidden">
+                        <div className="absolute top-0 right-0 bg-yellow-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-lg">باقة التوفير</div>
+                        <div className="flex justify-between items-center mb-2 mt-1">
+                          <h4 className="font-bold text-lg">باقة 4 جلسات طبيب</h4>
+                          <span className="bg-primary/20 text-primary px-3 py-1 rounded-full text-sm font-black">2600 ج.م</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground">باقة المتابعة الدورية الشاملة مع الطبيب النفسي.</p>
                       </div>
                     </label>
                   </div>
@@ -221,18 +245,28 @@ function HomePageContent() {
                 <div className="space-y-4 pt-4 border-t border-border">
                   <label className="text-base font-bold">طريقة الدفع المتاحة</label>
                   <div className="grid md:grid-cols-2 gap-4">
-                    <div className="p-4 rounded-xl bg-muted/30 border border-muted flex items-center gap-4">
-                       <Smartphone className="w-8 h-8 text-red-500" />
-                       <div>
+                    <div className="p-4 rounded-xl bg-muted/30 border border-muted flex items-center gap-4 group hover:border-primary/50 transition-colors">
+                       <Smartphone className="w-8 h-8 text-red-500 flex-shrink-0" />
+                       <div className="flex-1">
                          <p className="font-bold">فودافون كاش</p>
-                         <p className="text-sm text-muted-foreground font-mono">01006119365</p>
+                         <div className="flex items-center gap-2 mt-1">
+                           <p className="text-sm text-muted-foreground font-mono bg-background px-2 py-1 rounded-md">01006119365</p>
+                           <button type="button" onClick={() => { navigator.clipboard.writeText('01006119365'); alert('تم نسخ الرقم'); }} className="p-1.5 bg-primary/10 text-primary rounded-md hover:bg-primary hover:text-white transition-colors" title="نسخ الرقم">
+                             <Copy className="w-3.5 h-3.5" />
+                           </button>
+                         </div>
                        </div>
                     </div>
-                    <div className="p-4 rounded-xl bg-muted/30 border border-muted flex items-center gap-4">
-                       <CreditCard className="w-8 h-8 text-purple-600" />
-                       <div>
+                    <div className="p-4 rounded-xl bg-muted/30 border border-muted flex items-center gap-4 group hover:border-primary/50 transition-colors">
+                       <CreditCard className="w-8 h-8 text-purple-600 flex-shrink-0" />
+                       <div className="flex-1">
                          <p className="font-bold">إنستا باي (InstaPay)</p>
-                         <p className="text-sm text-muted-foreground font-mono">01102553741</p>
+                         <div className="flex items-center gap-2 mt-1">
+                           <p className="text-sm text-muted-foreground font-mono bg-background px-2 py-1 rounded-md">01102553741</p>
+                           <button type="button" onClick={() => { navigator.clipboard.writeText('01102553741'); alert('تم نسخ الرقم'); }} className="p-1.5 bg-primary/10 text-primary rounded-md hover:bg-primary hover:text-white transition-colors" title="نسخ الرقم">
+                             <Copy className="w-3.5 h-3.5" />
+                           </button>
+                         </div>
                        </div>
                     </div>
                   </div>
