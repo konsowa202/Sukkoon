@@ -30,10 +30,10 @@ export function middleware(request: NextRequest) {
       if (pathname.startsWith('/admin') && payload.role !== 'admin') {
         return NextResponse.redirect(new URL('/login', request.url))
       }
-      if (pathname.startsWith('/doctor') && payload.role !== 'doctor') {
+      if (pathname.startsWith('/doctor') && payload.role !== 'doctor' && payload.role !== 'admin') {
         return NextResponse.redirect(new URL('/login', request.url))
       }
-      if (pathname.startsWith('/patient') && payload.role !== 'patient') {
+      if (pathname.startsWith('/patient') && payload.role !== 'patient' && payload.role !== 'admin') {
         return NextResponse.redirect(new URL('/login', request.url))
       }
     }
