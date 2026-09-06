@@ -45,11 +45,15 @@ function HomePageContent() {
       <section className="container mx-auto px-4 py-12 md:py-20">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary mb-2">
+              <span className="text-sm font-semibold text-muted-foreground">{language === 'ar' ? 'بدعم من' : 'Powered by'}</span>
+              <span className="font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Gahbaz Tech</span>
+            </div>
             <h1 className="text-4xl md:text-6xl font-bold text-balance leading-tight">{t("hero.title")}</h1>
             <p className="text-lg md:text-xl text-muted-foreground text-pretty">{t("hero.subtitle")}</p>
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <Button size="lg" asChild className="text-lg shadow-lg shadow-primary/20">
-                <Link href="/patient/search">{t("hero.cta")}</Link>
+              <Button size="lg" asChild className="text-lg shadow-lg shadow-primary/20 bg-gradient-to-r from-primary to-primary/80 hover:scale-105 transition-transform rounded-full px-8">
+                <Link href="/patient/search">{language === 'ar' ? 'احجز جلستك الآن' : 'Book Your Session Now'}</Link>
               </Button>
               {user ? (
                 <Button size="lg" variant="outline" asChild className="text-lg bg-transparent border-primary/20 hover:border-primary/50 transition-colors">
@@ -64,13 +68,13 @@ function HomePageContent() {
             <div className="flex items-center gap-6 pt-4">
               <div className="flex -space-x-3">
                 {[
-                  "https://mshbiqfmfomofvksicth.supabase.co/storage/v1/object/public/doctor-images/1735158655075-omar-ahmed.jpg",
-                  "https://mshbiqfmfomofvksicth.supabase.co/storage/v1/object/public/doctor-images/1735158580004-eslam-abd-elhakeem.jpg",
-                  "https://mshbiqfmfomofvksicth.supabase.co/storage/v1/object/public/doctor-images/1735160241031-amar-yasser-salah.jpg",
-                  "https://mshbiqfmfomofvksicth.supabase.co/storage/v1/object/public/doctor-images/1735160416805-nour-ahmed.jpg"
+                  "/placeholder.svg",
+                  "/placeholder.svg",
+                  "/placeholder.svg",
+                  "/placeholder.svg"
                 ].map((url, i) => (
                   <div key={i} className="w-12 h-12 rounded-full border-4 border-background overflow-hidden animate-float bg-muted" style={{ animationDelay: `${i * 0.2}s` }}>
-                    <Image src={url} alt={`Doctor ${i}`} width={48} height={48} className="object-cover" />
+                    <Image src={url} alt={`User ${i}`} width={48} height={48} className="object-cover" />
                   </div>
                 ))}
               </div>
