@@ -194,51 +194,89 @@ function HomePageContent() {
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <label className="text-base font-bold">نوع الاستشارة المطلوبة</label>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <label className="cursor-pointer">
-                      <input type="radio" name="consultation" value="therapist" className="peer sr-only" required />
-                      <div className="p-4 rounded-xl border-2 border-muted bg-background/50 peer-checked:border-primary peer-checked:bg-primary/5 transition-all h-full">
-                        <div className="flex justify-between items-center mb-2">
-                          <h4 className="font-bold text-lg">أخصائي نفسي (جلسة واحدة)</h4>
-                          <span className="bg-primary/20 text-primary px-3 py-1 rounded-full text-sm font-black">450 ج.م</span>
-                        </div>
-                        <p className="text-sm text-muted-foreground">للدعم النفسي، وتعديل السلوك، وجلسات العلاج الكلامي.</p>
-                      </div>
+                <div className="space-y-8">
+                  {/* Single Sessions */}
+                  <div>
+                    <label className="text-base font-bold flex items-center gap-2 mb-4 text-foreground">
+                      <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold shadow-md">1</span>
+                      حجز جلسة فردية
                     </label>
-                    <label className="cursor-pointer">
-                      <input type="radio" name="consultation" value="therapist_package" className="peer sr-only" required />
-                      <div className="p-4 rounded-xl border-2 border-muted bg-background/50 peer-checked:border-primary peer-checked:bg-primary/5 transition-all h-full relative overflow-hidden">
-                        <div className="absolute top-0 right-0 bg-yellow-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-lg">باقة التوفير</div>
-                        <div className="flex justify-between items-center mb-2 mt-1">
-                          <h4 className="font-bold text-lg">باقة 4 جلسات أخصائي</h4>
-                          <span className="bg-primary/20 text-primary px-3 py-1 rounded-full text-sm font-black">1800 ج.م</span>
+                    <div className="grid md:grid-cols-2 gap-4 pl-10">
+                      <label className="cursor-pointer group">
+                        <input type="radio" name="consultation" value="therapist" className="peer sr-only" required />
+                        <div className="p-5 rounded-2xl border-2 border-muted bg-background/50 peer-checked:border-primary peer-checked:bg-primary/5 transition-all hover:border-primary/30 h-full flex flex-col justify-between">
+                          <div>
+                            <div className="flex justify-between items-start mb-3">
+                              <h4 className="font-bold text-lg group-hover:text-primary transition-colors">أخصائي نفسي</h4>
+                              <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-black whitespace-nowrap">450 ج.م</span>
+                            </div>
+                            <p className="text-sm text-muted-foreground leading-relaxed">للدعم النفسي، وتعديل السلوك، وجلسات العلاج الكلامي. (جلسة واحدة)</p>
+                          </div>
                         </div>
-                        <p className="text-sm text-muted-foreground">باقة متكاملة للمتابعة المستمرة بأسعار خاصة.</p>
-                      </div>
-                    </label>
-                    <label className="cursor-pointer">
-                      <input type="radio" name="consultation" value="psychiatrist" className="peer sr-only" required />
-                      <div className="p-4 rounded-xl border-2 border-muted bg-background/50 peer-checked:border-primary peer-checked:bg-primary/5 transition-all h-full">
-                        <div className="flex justify-between items-center mb-2">
-                          <h4 className="font-bold text-lg">طبيب نفسي (جلسة واحدة)</h4>
-                          <span className="bg-primary/20 text-primary px-3 py-1 rounded-full text-sm font-black">650 ج.م</span>
+                      </label>
+                      <label className="cursor-pointer group">
+                        <input type="radio" name="consultation" value="psychiatrist" className="peer sr-only" required />
+                        <div className="p-5 rounded-2xl border-2 border-muted bg-background/50 peer-checked:border-primary peer-checked:bg-primary/5 transition-all hover:border-primary/30 h-full flex flex-col justify-between">
+                          <div>
+                            <div className="flex justify-between items-start mb-3">
+                              <h4 className="font-bold text-lg group-hover:text-primary transition-colors">طبيب نفسي</h4>
+                              <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-black whitespace-nowrap">650 ج.م</span>
+                            </div>
+                            <p className="text-sm text-muted-foreground leading-relaxed">للتشخيص الطبي، ووصف الأدوية ومتابعة الحالات الإكلينيكية. (جلسة واحدة)</p>
+                          </div>
                         </div>
-                        <p className="text-sm text-muted-foreground">للتشخيص الطبي، ووصف الأدوية ومتابعة الحالات الإكلينيكية.</p>
-                      </div>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Separator */}
+                  <div className="relative pl-10 py-2">
+                    <div className="absolute inset-0 flex items-center pl-10" aria-hidden="true">
+                      <div className="w-full border-t border-dashed border-primary/30"></div>
+                    </div>
+                    <div className="relative flex justify-center">
+                      <span className="bg-background/80 backdrop-blur-sm px-4 text-sm font-black text-primary flex items-center gap-2">
+                        <Star className="w-4 h-4 fill-primary" />
+                        أو اختار من الباقات (أوفر ليك)
+                        <Star className="w-4 h-4 fill-primary" />
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Packages */}
+                  <div>
+                    <label className="text-base font-bold flex items-center gap-2 mb-4 text-foreground">
+                      <span className="w-8 h-8 rounded-full bg-accent text-accent-foreground flex items-center justify-center font-bold shadow-md">2</span>
+                      نظام الباقات الموفرة
                     </label>
-                    <label className="cursor-pointer">
-                      <input type="radio" name="consultation" value="psychiatrist_package" className="peer sr-only" required />
-                      <div className="p-4 rounded-xl border-2 border-muted bg-background/50 peer-checked:border-primary peer-checked:bg-primary/5 transition-all h-full relative overflow-hidden">
-                        <div className="absolute top-0 right-0 bg-yellow-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-lg">باقة التوفير</div>
-                        <div className="flex justify-between items-center mb-2 mt-1">
-                          <h4 className="font-bold text-lg">باقة 4 جلسات طبيب</h4>
-                          <span className="bg-primary/20 text-primary px-3 py-1 rounded-full text-sm font-black">2600 ج.م</span>
+                    <div className="grid md:grid-cols-2 gap-4 pl-10">
+                      <label className="cursor-pointer group">
+                        <input type="radio" name="consultation" value="therapist_package" className="peer sr-only" required />
+                        <div className="p-5 rounded-2xl border-2 border-accent/20 bg-gradient-to-br from-background to-accent/5 peer-checked:border-accent peer-checked:from-accent/10 peer-checked:to-accent/5 transition-all hover:border-accent/50 h-full relative overflow-hidden flex flex-col justify-between">
+                          <div className="absolute top-0 right-0 bg-accent text-accent-foreground text-xs font-bold px-3 py-1 rounded-bl-xl shadow-sm">الأكثر طلباً</div>
+                          <div className="mt-2">
+                            <div className="flex justify-between items-start mb-3">
+                              <h4 className="font-bold text-lg text-accent-foreground group-hover:text-accent transition-colors">باقة أخصائي (4 جلسات)</h4>
+                              <span className="bg-accent/20 text-accent-foreground px-3 py-1 rounded-full text-sm font-black whitespace-nowrap shadow-sm">1800 ج.م</span>
+                            </div>
+                            <p className="text-sm text-muted-foreground leading-relaxed">باقة متكاملة للمتابعة المستمرة بسعر موفر، التزام بيضمنلك نتيجة أفضل.</p>
+                          </div>
                         </div>
-                        <p className="text-sm text-muted-foreground">باقة المتابعة الدورية الشاملة مع الطبيب النفسي.</p>
-                      </div>
-                    </label>
+                      </label>
+                      <label className="cursor-pointer group">
+                        <input type="radio" name="consultation" value="psychiatrist_package" className="peer sr-only" required />
+                        <div className="p-5 rounded-2xl border-2 border-accent/20 bg-gradient-to-br from-background to-accent/5 peer-checked:border-accent peer-checked:from-accent/10 peer-checked:to-accent/5 transition-all hover:border-accent/50 h-full relative overflow-hidden flex flex-col justify-between">
+                          <div className="absolute top-0 right-0 bg-accent text-accent-foreground text-xs font-bold px-3 py-1 rounded-bl-xl shadow-sm">باقة التوفير</div>
+                          <div className="mt-2">
+                            <div className="flex justify-between items-start mb-3">
+                              <h4 className="font-bold text-lg text-accent-foreground group-hover:text-accent transition-colors">باقة طبيب (4 جلسات)</h4>
+                              <span className="bg-accent/20 text-accent-foreground px-3 py-1 rounded-full text-sm font-black whitespace-nowrap shadow-sm">2600 ج.م</span>
+                            </div>
+                            <p className="text-sm text-muted-foreground leading-relaxed">باقة المتابعة الدورية الشاملة مع الطبيب النفسي لضمان استقرار الحالة.</p>
+                          </div>
+                        </div>
+                      </label>
+                    </div>
                   </div>
                 </div>
 

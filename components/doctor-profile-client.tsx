@@ -153,78 +153,7 @@ export function DoctorProfileClient({ doctor, doctorId, busySlotsInitial }: { do
                 </div>
             </div>
 
-            {/* Dialogs */}
-            <Dialog open={bookingStep === "type"} onOpenChange={(open) => !open && setBookingStep(null)}>
-                <DialogContent>
-                    <DialogHeader><DialogTitle>Select Consultation Type</DialogTitle></DialogHeader>
-                    <div className="grid grid-cols-2 gap-4 pt-4">
-                        <Button variant="outline" className="h-32 flex-col gap-2 bg-transparent" onClick={() => handleTypeSelect("online")}>
-                            <Video className="w-8 h-8" /><p className="font-semibold">Online</p>
-                            <p className="text-sm text-muted-foreground">{doctor.priceOnline} EGP</p>
-                        </Button>
-                        <Button variant="outline" className="h-32 flex-col gap-2 bg-transparent" onClick={() => handleTypeSelect("offline")}>
-                            <MapPin className="w-8 h-8" /><p className="font-semibold">In-Person</p>
-                            <p className="text-sm text-muted-foreground">{doctor.priceOffline} EGP</p>
-                        </Button>
-                    </div>
-                </DialogContent>
-            </Dialog>
 
-            <Dialog open={bookingStep === "date"} onOpenChange={(open) => !open && setBookingStep(null)}>
-                <DialogContent>
-                    <DialogHeader><DialogTitle>Select Date</DialogTitle></DialogHeader>
-                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 pt-4">
-                        {availableDates.map((item) => {
-                            const slots = getFilteredSlots(item.dayName, item.dateStr)
-                            const isFull = slots.length === 0
-                            return (
-                                <Button key={item.dateStr} variant={selectedDate === item.dateStr ? "default" : "outline"}
-                                    className={`h-auto py-3 px-1 flex-col gap-0.5 rounded-xl ${isFull ? 'opacity-40 pointer-events-none' : ''}`}
-                                    onClick={() => !isFull && handleDateSelect(item.dayName, item.dateStr)}
-                                    disabled={isFull}
-                                >
-                                    <span className="text-lg font-black">{format(item.date, 'dd')}</span>
-                                    <span className="text-[9px] font-medium">{item.dayName.substring(0, 3)}</span>
-                                </Button>
-                            )
-                        })}
-                    </div>
-                </DialogContent>
-            </Dialog>
-
-            <Dialog open={bookingStep === "time"} onOpenChange={(open) => !open && setBookingStep(null)}>
-                <DialogContent>
-                    <DialogHeader><DialogTitle>Select Time Slot</DialogTitle></DialogHeader>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-4">
-                        {availableSlots.map((slot) => {
-                            const [hourStr] = slot.split(':')
-                            const hour = parseInt(hourStr)
-                            const isPM = hour >= 12
-                            const hour12 = hour % 12 || 12
-                            const displayTime = `${hour12}:00 ${isPM ? (languageContext?.language === 'ar' ? 'م' : 'PM') : (languageContext?.language === 'ar' ? 'ص' : 'AM')}`
-
-                            return (
-                                <Button
-                                    key={slot}
-                                    variant={selectedTime === slot ? "default" : "outline"}
-                                    onClick={() => handleTimeSelect(slot)}
-                                    disabled={bookingLoading}
-                                    className="text-xs py-4 h-auto"
-                                >
-                                    {displayTime}
-                                </Button>
-                            )
-                        })}
-                    </div>
-                </DialogContent>
-            </Dialog>
-
-            <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
-                <DialogContent className="text-center">
-                    <DialogHeader><DialogTitle className="text-2xl">Booking Confirmed!</DialogTitle></DialogHeader>
-                    <div className="py-6"><p>Your appointment has been successfully booked</p></div>
-                </DialogContent>
-            </Dialog>
         </div>
     )
 }
