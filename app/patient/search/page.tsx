@@ -9,12 +9,14 @@ import { useLanguage } from "@/contexts/language-context"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useAuth } from "@/contexts/auth-context"
 import { useRouter } from "next/navigation"
+import { useToast } from "@/components/ui/use-toast"
 
 export default function GenericBookingPage() {
   const { t, language } = useLanguage()
   const isAr = language === "ar"
   const { user } = useAuth()
   const router = useRouter()
+  const { toast } = useToast()
   const [selectedService, setSelectedService] = useState<any>(null)
   const [isBookingOpen, setIsBookingOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -64,7 +66,11 @@ export default function GenericBookingPage() {
 
   const openBooking = (service: any) => {
     if (!user) {
-       alert(isAr ? 'يجب تسجيل الدخول أولاً لحجز الجلسة' : 'You must log in first to book a session');
+       toast({
+         title: isAr ? "تنبيه" : "Notice",
+         description: isAr ? 'يجب تسجيل الدخول أولاً لحجز الجلسة' : 'You must log in first to book a session',
+         variant: "destructive"
+       });
        router.push('/login');
        return;
     }
@@ -75,7 +81,11 @@ export default function GenericBookingPage() {
   const handleBookingSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!user) {
-        alert(isAr ? 'يجب تسجيل الدخول أولاً' : 'You must log in first');
+        toast({
+          title: isAr ? "خطأ" : "Error",
+          description: isAr ? 'يجب تسجيل الدخول أولاً' : 'You must log in first',
+          variant: "destructive"
+        });
         return;
     }
     setIsSubmitting(true);
@@ -127,14 +137,25 @@ export default function GenericBookingPage() {
       });
 
       if(response.ok) {
-        alert(isAr ? 'تم إرسال طلبك بنجاح! سيتم مراجعته والتواصل معك قريباً.' : 'Your request has been submitted successfully! We will contact you soon.');
+        toast({
+          title: isAr ? "تم بنجاح" : "Success",
+          description: isAr ? 'تم إرسال طلبك بنجاح! سيتم مراجعته والتواصل معك قريباً.' : 'Your request has been submitted successfully! We will contact you soon.',
+        });
         setIsBookingOpen(false);
       } else {
         const errorData = await response.json();
-        alert(isAr ? `حدث خطأ: ${errorData.error}` : `Error: ${errorData.error}`);
+        toast({
+          title: isAr ? "خطأ" : "Error",
+          description: isAr ? `حدث خطأ: ${errorData.error}` : `Error: ${errorData.error}`,
+          variant: "destructive"
+        });
       }
     } catch(err: any) {
-      alert(isAr ? `حدث خطأ: ${err.message}` : `Error: ${err.message}`);
+      toast({
+        title: isAr ? "خطأ" : "Error",
+        description: isAr ? `حدث خطأ: ${err.message}` : `Error: ${err.message}`,
+        variant: "destructive"
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -250,7 +271,7 @@ export default function GenericBookingPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-mono font-bold bg-background px-2 py-1 rounded-md border border-border">01006119365</p>
-                    <button type="button" onClick={() => { navigator.clipboard.writeText('01006119365'); alert(isAr ? 'تم نسخ الرقم' : 'Number Copied'); }} className="p-1.5 bg-primary/10 text-primary rounded-md hover:bg-primary hover:text-white transition-colors">
+                    <button type="button" onClick={() => { navigator.clipboard.writeText('01006119365'); toast({ description: isAr ? 'تم نسخ الرقم' : 'Number Copied' }); }} className="p-1.5 bg-primary/10 text-primary rounded-md hover:bg-primary hover:text-white transition-colors">
                       <Copy className="w-4 h-4" />
                     </button>
                   </div>
@@ -263,7 +284,7 @@ export default function GenericBookingPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-mono font-bold bg-background px-2 py-1 rounded-md border border-border">01102553741</p>
-                    <button type="button" onClick={() => { navigator.clipboard.writeText('01102553741'); alert(isAr ? 'تم نسخ الرقم' : 'Number Copied'); }} className="p-1.5 bg-primary/10 text-primary rounded-md hover:bg-primary hover:text-white transition-colors">
+                    <button type="button" onClick={() => { navigator.clipboard.writeText('01102553741'); toast({ description: isAr ? 'تم نسخ الرقم' : 'Number Copied' }); }} className="p-1.5 bg-primary/10 text-primary rounded-md hover:bg-primary hover:text-white transition-colors">
                       <Copy className="w-4 h-4" />
                     </button>
                   </div>

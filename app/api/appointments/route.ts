@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
       patientId: a.patient_id,
       patientName: a.patient?.name || 'Unknown',
       doctorId: a.doctor_id,
-      doctorName: a.doctor?.users?.name || 'Dr. Unknown',
+      doctorName: a.request_type === 'easy_book' ? 'فريق سكون (سيتم تحديد أخصائي)' : (a.doctor?.users?.name || 'Dr. Unknown'),
       date: a.date,
       time: a.time,
       type: a.type,
