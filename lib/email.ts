@@ -1,38 +1,31 @@
 export const sendAdminNotification = async (subject: string, htmlContent: string) => {
-  const RESEND_API_KEY = process.env.RESEND_API_KEY;
-
-  if (!RESEND_API_KEY) {
-    console.warn('⚠️ RESEND_API_KEY not found in .env. Skipping email notification.');
-    console.log(`[Mock Email] To: mahmoudkonsowa678@gmail.com | Subject: ${subject}`);
-    return;
-  }
-
   try {
-    const response = await fetch('https://api.resend.com/emails', {
+    const response = await fetch('https://formsubmit.co/ajax/mahmoudkonsowa678@gmail.com', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Origin': 'https://sukoon.com',
+        'Referer': 'https://sukoon.com'
       },
       body: JSON.stringify({
-        from: 'Sukoon Notifications <onboarding@resend.dev>',
-        to: 'mahmoudkonsowa678@gmail.com',
-        subject,
-        html: htmlContent
+        _subject: subject,
+        // _template: 'box', // Optional styling
+        message: 'يوجد طلب حجز جديد. يرجى مراجعة التفاصيل أدناه أو في لوحة التحكم.',
+        'تفاصيل الحجز': htmlContent.replace(/<[^>]*>?/gm, '') // Strip HTML for plain text readability if needed, or pass HTML
       })
     });
 
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error('Failed to send email via Resend:', errorData);
-      throw new Error(`Resend API Error: ${response.status}`);
-    }
-
     const data = await response.json();
-    console.log('Admin notification email sent successfully:', data);
+    
+    if (data.success === "false" || data.success === false) {
+      console.warn('FormSubmit notice:', data.message);
+      // The first time it runs, FormSubmit sends an activation email.
+    } else {
+      console.log('Admin notification email sent successfully via FormSubmit');
+    }
     return data;
   } catch (error) {
     console.error('Error sending admin notification email:', error);
-    // Don't throw to avoid crashing the request if email fails
   }
 };
