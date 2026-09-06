@@ -1,6 +1,7 @@
 "use client"
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react"
+import { useLanguage } from "./language-context"
 
 export type CountryCode = "EG" | "GULF" | "EU" | "OTHER"
 
@@ -30,6 +31,8 @@ const getPricingRegion = (isoCode: string): CountryCode => {
 export function LocationProvider({ children }: { children: ReactNode }) {
   const [countryCode, setCountryCode] = useState<CountryCode>("EG")
   const [currency, setCurrency] = useState("EGP")
+  const { language } = useLanguage()
+  const isAr = language === "ar"
 
   useEffect(() => {
     // Check if we already have it in localStorage
@@ -80,13 +83,13 @@ export function LocationProvider({ children }: { children: ReactNode }) {
 
     // 2. Apply regional pricing
     if (countryCode === "EG") {
-      return `${adjustedBasePrice} EGP`
+      return `${adjustedBasePrice} ${isAr ? "جنيه مصري" : "EGP"}`
     } else if (countryCode === "GULF") {
       // Convert EGP to SAR (roughly 1 SAR = 13 EGP, but we apply a premium multiplier for Gulf)
       // Let's assume a premium multiplier of 2x for Gulf in base value, then convert to SAR
       // Example: 450 EGP -> 900 EGP equivalent -> ~150 SAR
       const gulfPriceSar = Math.round((adjustedBasePrice * 1.5) / 13 / 5) * 5 // Round to nearest 5
-      return `${gulfPriceSar} SAR`
+      return `${gulfPriceSar} ${isAr ? "ريال سعودي" : "SAR"}`
     } else {
       // EU / US / OTHER
       // Convert EGP to USD (roughly 1 USD = 50 EGP, applying premium)

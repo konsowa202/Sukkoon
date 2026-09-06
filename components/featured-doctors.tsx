@@ -92,27 +92,32 @@ export function FeaturedDoctors() {
                         const localizedSpec = spec ? (isAr ? spec.ar : spec.en) : doctor.specialization;
 
                         return (
-                            <div key={doctor.id} className="min-w-[280px] sm:min-w-[320px] md:min-w-0 snap-center">
-                                <Card className="h-full group hover:border-primary/50 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/5 border-none bg-card overflow-hidden">
-                                    <div className="relative h-64 overflow-hidden">
+                            <div key={doctor.id} className="min-w-[280px] sm:min-w-[320px] md:min-w-0 snap-center relative group">
+                                {/* Subtle glowing background effect behind the card */}
+                                <div className="absolute -inset-0.5 bg-gradient-to-tr from-primary/10 to-accent/10 rounded-xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                
+                                <Card className="relative h-full transition-all duration-500 hover:-translate-y-2 border border-white/5 bg-card/60 backdrop-blur-xl overflow-hidden hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-primary/20 hover:border-primary/30">
+                                    <div className="relative h-64 overflow-hidden bg-muted/20">
+                                        {/* Gradient overlay for image depth */}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent z-10" />
                                         <Image
                                             src={doctor.image || "/placeholder.svg"}
                                             alt={doctor.name}
                                             fill
-                                            className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                            className="object-cover transition-transform duration-700 group-hover:scale-110"
                                         />
-                                        <div className="absolute top-4 right-4">
-                                            <Badge className="bg-background/80 backdrop-blur text-foreground font-bold border-none">
-                                                <Star className="w-3 h-3 fill-yellow-500 text-yellow-500 mr-1" />
+                                        <div className="absolute top-4 right-4 z-20">
+                                            <Badge className="bg-background/90 backdrop-blur-md text-foreground font-bold border border-white/10 shadow-lg px-2 py-1">
+                                                <Star className="w-3.5 h-3.5 fill-yellow-500 text-yellow-500 mr-1" />
                                                 {doctor.rating}
                                             </Badge>
                                         </div>
                                     </div>
 
-                                    <div className="p-6 space-y-4">
+                                    <div className="p-6 space-y-4 relative z-20">
                                         <div>
-                                            <h3 className="text-xl font-bold group-hover:text-primary transition-colors">{doctor.name}</h3>
-                                            <p className="text-sm text-primary font-medium">{localizedSpec}</p>
+                                            <h3 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70 group-hover:to-primary transition-colors">{doctor.name}</h3>
+                                            <p className="text-sm font-semibold text-primary mt-1">{localizedSpec}</p>
                                         </div>
 
                                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
@@ -126,14 +131,14 @@ export function FeaturedDoctors() {
                                             </div>
                                         </div>
 
-                                        <div className="pt-2 border-t flex items-center justify-between">
-                                            <div className="space-y-0.5">
+                                        <div className="pt-4 border-t border-white/5 flex items-center justify-between">
+                                            <div className="space-y-1">
                                                 <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">{t("doctors.startingFrom")}</p>
-                                                <p className="text-lg font-black text-foreground">
+                                                <p className="text-lg font-black text-foreground" dir={isAr ? "rtl" : "ltr"}>
                                                     {formatPrice(doctor.priceOnline, doctor.specialization)}
                                                 </p>
                                             </div>
-                                            <Button size="sm" asChild className="shadow-lg shadow-primary/20">
+                                            <Button size="sm" asChild className="rounded-full shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-all bg-gradient-to-r from-primary to-primary/80 px-6">
                                                 <Link href={`/patient/doctor/${doctor.id}`}>{t("doctors.bookNow")}</Link>
                                             </Button>
                                         </div>

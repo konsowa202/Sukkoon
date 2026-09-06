@@ -334,9 +334,17 @@ function HomePageContent() {
               </ul>
             </div>
           </div>
-          <div className="border-t border-border pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+          <div className="border-t border-border pt-8 flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left">
             <p className="text-sm text-muted-foreground">© {language === 'ar' ? '٢٠٢٥ سكون' : '2025 Sukoon'}. {t("footer.rights")}</p>
-            <p className="text-sm font-semibold text-muted-foreground">Powered by <span className="text-primary font-bold">Gahbaz Tech</span></p>
+            <div className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary/5 border border-primary/10 shadow-inner hover:bg-primary/10 transition-colors">
+              <p className="text-sm font-medium text-muted-foreground">Powered by</p>
+              <a href="#" className="relative group/brand cursor-pointer flex items-center">
+                <div className="absolute -inset-2 bg-gradient-to-r from-primary to-accent rounded-lg blur opacity-20 group-hover/brand:opacity-60 transition duration-500"></div>
+                <span className="relative font-black text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary to-accent text-base tracking-wide drop-shadow-sm">
+                  Gahbaz Tech
+                </span>
+              </a>
+            </div>
           </div>
         </div>
       </footer>
