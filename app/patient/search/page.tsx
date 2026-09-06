@@ -1,464 +1,244 @@
 "use client"
 
-import { useState, useEffect, memo } from "react"
-
-const DoctorCard = memo(({ doctor, t, isAr, formatPrice }: { doctor: Doctor, t: any, isAr: boolean, formatPrice: (price: number, spec?: string) => string }) => {
-  // Find localized governorate
-  const gov = EGYPTIAN_GOVERNORATES.find(g => g.en.toLowerCase() === doctor.city?.toLowerCase());
-  const localizedCity = gov ? (isAr ? gov.ar : gov.en) : doctor.city;
-
-  // Find localized specialization
-  const spec = DOCTOR_SPECIALIZATIONS.find(s => s.en.toLowerCase() === doctor.specialization?.toLowerCase());
-  const localizedSpec = spec ? (isAr ? spec.ar : spec.en) : doctor.specialization;
-
-  return (
-    <div className="relative group">
-      {/* Subtle glowing background effect behind the card */}
-      <div className="absolute -inset-0.5 bg-gradient-to-tr from-primary/10 to-accent/10 rounded-xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-      <Card key={doctor.id} className="relative overflow-hidden transition-all duration-500 hover:-translate-y-1 border border-white/5 bg-card/60 backdrop-blur-xl hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-primary/20 hover:border-primary/30 z-10">
-        <div className="p-6 space-y-4">
-          <div className="flex gap-4">
-            <div className="relative w-20 h-20 rounded-lg overflow-hidden ring-2 ring-primary/20 group-hover:ring-primary/50 transition-all shadow-md">
-              <img
-                src={doctor.image || "/placeholder.svg"}
-                alt={doctor.name}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-            </div>
-          <div className="flex-1">
-            <h3 className="font-semibold text-lg bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80 group-hover:to-primary transition-colors">{doctor.name}</h3>
-            <p className="text-sm font-medium text-primary mt-0.5">{localizedSpec}</p>
-            <div className="flex items-center gap-2 mt-1.5">
-              <div className="flex items-center gap-1 bg-yellow-500/10 px-1.5 py-0.5 rounded text-yellow-600 dark:text-yellow-500">
-                <Star className="w-3.5 h-3.5 fill-current" />
-                <span className="text-xs font-bold">{doctor.rating}</span>
-              </div>
-              <span className="text-xs text-muted-foreground">({doctor.reviewCount} {t("search.reviews")})</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex gap-2 flex-wrap">
-          {(doctor.consultationType === "online" || doctor.consultationType === "both") && (
-            <Badge variant="secondary" className="gap-1 bg-primary/5 text-primary border-none">
-              <Video className="w-3 h-3" />
-              {t("search.online")}
-            </Badge>
-          )}
-          {(doctor.consultationType === "offline" || doctor.consultationType === "both") && (
-            <Badge variant="secondary" className="gap-1 bg-secondary/50 border-none">
-              <MapPin className="w-3 h-3" />
-              {t("search.offline")}
-            </Badge>
-          )}
-          {doctor.city && (
-            <Badge variant="outline" className="gap-1 border-border/50">
-              <MapPin className="w-3 h-3" />
-              {localizedCity}
-            </Badge>
-          )}
-        </div>
-
-        <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">{doctor.bio}</p>
-
-        <div className="flex items-center gap-4 text-sm flex-wrap pt-4 border-t border-white/5">
-          {(doctor.consultationType === "online" || doctor.consultationType === "both") && (
-            <div className="flex items-center gap-1.5">
-              <Video className="w-4 h-4 text-primary" />
-              <span className="font-black text-lg text-foreground tracking-tight" dir={isAr ? "rtl" : "ltr"}>
-                {formatPrice(doctor.priceOnline, doctor.specialization)}
-              </span>
-            </div>
-          )}
-          <span className="text-muted-foreground">• {doctor.experience} {t("search.exp")}</span>
-        </div>
-
-        <Button asChild className="w-full rounded-full shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all bg-gradient-to-r from-primary to-primary/80 mt-2">
-          <Link href={`/patient/doctor/${doctor.id}`}>{t("search.viewProfile")}</Link>
-        </Button>
-      </div>
-    </Card>
-    </div>
-  )
-})
-DoctorCard.displayName = "DoctorCard"
-
-const DoctorList = memo(({ doctors, t, isAr, isFiltering, formatPrice }: { doctors: Doctor[], t: any, isAr: boolean, isFiltering: boolean, formatPrice: (price: number, spec?: string) => string }) => (
-  <div className={`grid md:grid-cols-2 gap-6 ${isFiltering ? 'opacity-50 pointer-events-none transition-opacity' : ''}`}>
-    {doctors.map((doctor) => (
-      <DoctorCard key={doctor.id} doctor={doctor} t={t} isAr={isAr} formatPrice={formatPrice} />
-    ))}
-  </div>
-))
-DoctorList.displayName = "DoctorList"
-import { type Doctor } from "@/lib/fallback-data"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Star, Search, MapPin, Video, BadgeIcon, Filter } from "lucide-react"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { Badge } from "@/components/ui/badge"
-import Link from "next/link"
+import { Star, ArrowLeft, Upload, Smartphone, CreditCard, Copy } from "lucide-react"
 import { HeaderNav } from "@/components/header-nav"
 import { useLanguage } from "@/contexts/language-context"
-import { useLocation } from "@/contexts/location-context"
-import { useAuth } from "@/contexts/auth-context"
-import { Skeleton } from "@/components/ui/skeleton"
-import { EGYPTIAN_GOVERNORATES, DOCTOR_SPECIALIZATIONS } from "@/lib/constants"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
-function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value)
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value)
-    }, delay)
-
-    return () => {
-      clearTimeout(handler)
-    }
-  }, [value, delay])
-
-  return debouncedValue
-}
-
-const FilterContent = ({
-  isMobile = false,
-  t,
-  isAr,
-  searchTerm,
-  setSearchTerm,
-  specializationFilter,
-  setSpecializationFilter,
-  consultationTypeFilter,
-  setConsultationTypeFilter,
-  cityFilter,
-  setCityFilter,
-  genderFilter,
-  setGenderFilter,
-  priceRange,
-  setPriceRange
-}: {
-  isMobile?: boolean,
-  t: any,
-  isAr: boolean,
-  searchTerm: string,
-  setSearchTerm: (v: string) => void,
-  specializationFilter: string,
-  setSpecializationFilter: (v: string) => void,
-  consultationTypeFilter: string,
-  setConsultationTypeFilter: (v: string) => void,
-  cityFilter: string,
-  setCityFilter: (v: string) => void,
-  genderFilter: string,
-  setGenderFilter: (v: string) => void,
-  priceRange: string,
-  setPriceRange: (v: string) => void
-}) => (
-  <div className="space-y-6">
-    {!isMobile && (
-      <div className="mb-2">
-        <h3 className="font-semibold text-lg">{t("search.filterLabel")}</h3>
-      </div>
-    )}
-
-    <div className="space-y-2">
-      <Label htmlFor="search" className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">{t("search.nameLabel")}</Label>
-      <div className="relative">
-        <Search className={`${isAr ? 'right-3' : 'left-3'} absolute top-3 h-4 w-4 text-muted-foreground`} />
-        <Input
-          id="search"
-          placeholder={t("search.namePlaceholder")}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className={`${isAr ? 'pr-9' : 'pl-9'} bg-muted/30 border-none focus-visible:ring-1 focus-visible:ring-primary`}
-        />
-      </div>
-    </div>
-
-    <div className="space-y-2">
-      <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">{t("search.specLabel")}</Label>
-      <Select value={specializationFilter} onValueChange={setSpecializationFilter}>
-        <SelectTrigger className="bg-muted/30 border-none">
-          <SelectValue placeholder={t("search.allSpec")} />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">{t("search.allSpec")}</SelectItem>
-          {DOCTOR_SPECIALIZATIONS.map((spec) => (
-            <SelectItem key={spec.en} value={spec.en}>
-              {isAr ? spec.ar : spec.en}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-
-    <div className="space-y-2">
-      <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">{t("search.typeLabel")}</Label>
-      <Select value={consultationTypeFilter} onValueChange={setConsultationTypeFilter}>
-        <SelectTrigger className="bg-muted/30 border-none">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">{t("search.allTypes")}</SelectItem>
-          <SelectItem value="online">{t("search.onlineOnly")}</SelectItem>
-          <SelectItem value="offline">{t("search.offlineOnly")}</SelectItem>
-          <SelectItem value="both">{t("search.bothTypes")}</SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
-
-    {(consultationTypeFilter === "offline" ||
-      consultationTypeFilter === "all" ||
-      consultationTypeFilter === "both") && (
-        <div className="space-y-2">
-          <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">{t("search.cityLabel")}</Label>
-          <Select value={cityFilter} onValueChange={setCityFilter}>
-            <SelectTrigger className="bg-muted/30 border-none">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t("search.cityLabel")} ( {t("search.anyGender")} )</SelectItem>
-              {EGYPTIAN_GOVERNORATES.map((gov) => (
-                <SelectItem key={gov.en} value={gov.en}>
-                  {isAr ? gov.ar : gov.en}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
-
-    <div className="space-y-2">
-      <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">{t("search.genderLabel")}</Label>
-      <Select value={genderFilter} onValueChange={setGenderFilter}>
-        <SelectTrigger className="bg-muted/30 border-none">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">{t("search.anyGender")}</SelectItem>
-          <SelectItem value="male">{t("search.male")}</SelectItem>
-          <SelectItem value="female">{t("search.female")}</SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
-
-    <div className="space-y-2">
-      <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">{t("search.priceLabel")}</Label>
-      <Select value={priceRange} onValueChange={setPriceRange}>
-        <SelectTrigger className="bg-muted/30 border-none">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">{t("search.allPrices")}</SelectItem>
-          <SelectItem value="low">{t("search.price.budget")}</SelectItem>
-          <SelectItem value="medium">{t("search.price.value")}</SelectItem>
-          <SelectItem value="high">{t("search.price.premium")}</SelectItem>
-          <SelectItem value="very-high">{t("search.price.specialized")}</SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
-
-    {isMobile && (
-      <div className="pt-4 lg:hidden">
-        <SheetTrigger asChild>
-          <Button className="w-full">View Results</Button>
-        </SheetTrigger>
-      </div>
-    )}
-  </div>
-)
-
-export default function SearchDoctorsPage() {
-  const [doctors, setDoctors] = useState<Doctor[]>([])
-  const [loading, setLoading] = useState(true)
-  const [isFiltering, setIsFiltering] = useState(false)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [specializationFilter, setSpecializationFilter] = useState("all")
-  const [genderFilter, setGenderFilter] = useState("all")
-  const [priceRange, setPriceRange] = useState("all")
-  const [consultationTypeFilter, setConsultationTypeFilter] = useState("all")
-  const [cityFilter, setCityFilter] = useState("all")
-  const debouncedSearchTerm = useDebounce(searchTerm, 800)
+export default function GenericBookingPage() {
   const { t, language } = useLanguage()
-  const { formatPrice } = useLocation()
   const isAr = language === "ar"
-  const { user, isLoading: authLoading } = useAuth()
+  const [selectedService, setSelectedService] = useState<any>(null)
+  const [isBookingOpen, setIsBookingOpen] = useState(false)
 
-  const fetchDoctors = async (showMainSkeleton = false) => {
-    if (showMainSkeleton) setLoading(true)
-    else setIsFiltering(true)
-
-    try {
-      const params = new URLSearchParams()
-      if (specializationFilter !== 'all') params.append('specialization', specializationFilter)
-      if (genderFilter !== 'all') params.append('gender', genderFilter)
-      if (consultationTypeFilter !== 'all') params.append('consultationType', consultationTypeFilter)
-      if (cityFilter !== 'all') params.append('city', cityFilter)
-      if (debouncedSearchTerm) params.append('search', debouncedSearchTerm)
-
-      if (priceRange === 'low') {
-        params.append('minPrice', '150')
-        params.append('maxPrice', '500')
-      } else if (priceRange === 'medium') {
-        params.append('minPrice', '500')
-        params.append('maxPrice', '1500')
-      } else if (priceRange === 'high') {
-        params.append('minPrice', '1500')
-      } else if (priceRange === 'very-high') {
-        params.append('maxPrice', '20000')
-      }
-
-      const response = await fetch(`/api/doctors?${params.toString()}`)
-      if (response.ok) {
-        const data = await response.json()
-        setDoctors(data)
-      } else {
-        setDoctors([])
-      }
-    } catch (error) {
-      console.error('Failed to fetch doctors:', error)
-      setDoctors([])
-    } finally {
-      setLoading(false)
-      setIsFiltering(false)
+  const services = [
+    {
+      id: "therapist",
+      titleAr: "أخصائي نفسي",
+      titleEn: "Therapist",
+      price: 450,
+      descAr: "للدعم النفسي، وتعديل السلوك، وجلسات العلاج الكلامي. (جلسة واحدة)",
+      descEn: "Psychological support, behavior modification, and talk therapy. (Single session)",
+      type: "single"
+    },
+    {
+      id: "therapist_package",
+      titleAr: "باقة 4 جلسات أخصائي",
+      titleEn: "Therapist Package (4 Sessions)",
+      price: 1800,
+      descAr: "باقة متكاملة للمتابعة المستمرة بسعر موفر، التزام بيضمنلك نتيجة أفضل.",
+      descEn: "A comprehensive package for continuous follow-up at a discounted price.",
+      type: "package",
+      tagAr: "الأكثر طلباً",
+      tagEn: "Most Popular"
+    },
+    {
+      id: "psychiatrist",
+      titleAr: "طبيب نفسي",
+      titleEn: "Psychiatrist",
+      price: 650,
+      descAr: "للتشخيص الطبي، ووصف الأدوية ومتابعة الحالات الإكلينيكية. (جلسة واحدة)",
+      descEn: "Medical diagnosis, prescribing medications, and clinical follow-up. (Single session)",
+      type: "single"
+    },
+    {
+      id: "psychiatrist_package",
+      titleAr: "باقة 4 جلسات طبيب",
+      titleEn: "Psychiatrist Package (4 Sessions)",
+      price: 2600,
+      descAr: "باقة المتابعة الدورية الشاملة مع الطبيب النفسي لضمان استقرار الحالة.",
+      descEn: "Comprehensive periodic follow-up package with a psychiatrist.",
+      type: "package",
+      tagAr: "باقة التوفير",
+      tagEn: "Savings Package"
     }
+  ]
+
+  const openBooking = (service: any) => {
+    setSelectedService(service)
+    setIsBookingOpen(true)
   }
 
-  // Initial fetch
-  useEffect(() => {
-    fetchDoctors(true)
-  }, [])
+  const handleBookingSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      const formData = new FormData(e.currentTarget);
+      
+      const response = await fetch('/api/appointments/request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          patientName: formData.get('name'),
+          phone: formData.get('phone'),
+          type: 'online', 
+          service: selectedService?.titleAr || 'خدمة غير محددة',
+          request_type: 'easy_book',
+          request_message: 'طلب حجز سريع من صفحة حجز الجلسات'
+        })
+      });
 
-  // Refetch on filter change
-  useEffect(() => {
-    const isInitialLoad = loading && doctors.length === 0
-    if (!isInitialLoad) {
-      fetchDoctors(false)
+      if(response.ok) {
+        alert(isAr ? 'تم إرسال طلبك بنجاح! سيتم مراجعته والتواصل معك قريباً.' : 'Your request has been submitted successfully! We will contact you soon.');
+        setIsBookingOpen(false);
+      } else {
+        alert(isAr ? 'حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى.' : 'An error occurred. Please try again.');
+      }
+    } catch(err) {
+      alert(isAr ? 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.' : 'An unexpected error occurred. Please try again.');
     }
-  }, [debouncedSearchTerm, specializationFilter, genderFilter, priceRange, consultationTypeFilter, cityFilter])
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <HeaderNav showAuth={false} />
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Desktop Filter Sidebar */}
-          <aside className="hidden lg:block lg:w-72">
-            <Card className="p-6 sticky top-24 border-none shadow-sm bg-card/50 backdrop-blur">
-              <FilterContent
-                t={t}
-                isAr={isAr}
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                specializationFilter={specializationFilter}
-                setSpecializationFilter={setSpecializationFilter}
-                consultationTypeFilter={consultationTypeFilter}
-                setConsultationTypeFilter={setConsultationTypeFilter}
-                cityFilter={cityFilter}
-                setCityFilter={setCityFilter}
-                genderFilter={genderFilter}
-                setGenderFilter={setGenderFilter}
-                priceRange={priceRange}
-                setPriceRange={setPriceRange}
-              />
-            </Card>
-          </aside>
+      <div className="container mx-auto px-4 py-12 md:py-20">
+        <div className="max-w-5xl mx-auto text-center mb-16 space-y-4">
+          <h1 className="text-4xl md:text-5xl font-black tracking-tight">{t("search.title")}</h1>
+          <p className="text-xl text-muted-foreground">{isAr ? 'اختر نوع الجلسة أو الباقة التي تناسب احتياجاتك لبدء رحلة التعافي.' : 'Choose the session type or package that fits your needs to start your recovery journey.'}</p>
+        </div>
 
-          <main className="flex-1">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight mb-2">{t("search.title")}</h1>
-                <div className="flex flex-wrap items-center gap-3 text-sm font-medium">
-                  <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20 border-none">
-                    {t("search.pricing.therapist")}
-                  </Badge>
-                  <Badge variant="secondary" className="bg-secondary text-secondary-foreground hover:bg-secondary/80 border-none">
-                    {t("search.pricing.psychiatrist")}
-                  </Badge>
-                </div>
-                <p className="text-xs text-muted-foreground mt-2 font-medium opacity-80">
-                  {t("search.pricing.note")}
-                </p>
-              </div>
-
-              {/* Mobile Filter Trigger */}
-              <div className="lg:hidden w-full sm:w-auto">
-                <Sheet>
-                  <SheetTrigger asChild>
-                    <Button variant="outline" className="w-full sm:w-auto gap-2 border-primary/20 hover:border-primary/40 bg-card/50 backdrop-blur">
-                      <Filter className="w-4 h-4" />
-                      {t("search.filterButton")}
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent side="bottom" className="h-[80vh] rounded-t-[2rem] p-0 overflow-hidden">
-                    <SheetHeader className="p-6 border-b text-left">
-                      <SheetTitle className="text-2xl font-bold">{t("search.filterLabel")}</SheetTitle>
-                    </SheetHeader>
-                    <div className="p-6 h-full overflow-y-auto pb-24">
-                      <FilterContent
-                        isMobile={true}
-                        t={t}
-                        isAr={isAr}
-                        searchTerm={searchTerm}
-                        setSearchTerm={setSearchTerm}
-                        specializationFilter={specializationFilter}
-                        setSpecializationFilter={setSpecializationFilter}
-                        consultationTypeFilter={consultationTypeFilter}
-                        setConsultationTypeFilter={setConsultationTypeFilter}
-                        cityFilter={cityFilter}
-                        setCityFilter={setCityFilter}
-                        genderFilter={genderFilter}
-                        setGenderFilter={setGenderFilter}
-                        priceRange={priceRange}
-                        setPriceRange={setPriceRange}
-                      />
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-8">
+          {/* Single Sessions Column */}
+          <div className="space-y-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl">1</div>
+              <h2 className="text-2xl font-bold">{isAr ? 'حجز جلسة فردية' : 'Single Session'}</h2>
+            </div>
+            
+            {services.filter(s => s.type === "single").map((service) => (
+              <Card key={service.id} className="p-8 border border-primary/20 hover:border-primary/50 transition-all hover:shadow-xl hover:shadow-primary/5 group relative overflow-hidden bg-card/60 backdrop-blur-xl">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors"></div>
+                
+                <div className="relative z-10 flex flex-col h-full">
+                  <div className="flex justify-between items-start mb-4">
+                    <h3 className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors">{isAr ? service.titleAr : service.titleEn}</h3>
+                    <div className="bg-primary/10 text-primary px-4 py-2 rounded-full font-black text-lg shadow-sm whitespace-nowrap">
+                      {service.price} {isAr ? 'ج.م' : 'EGP'}
                     </div>
-                  </SheetContent>
-                </Sheet>
+                  </div>
+                  <p className="text-muted-foreground leading-relaxed flex-1 mb-8 text-lg">{isAr ? service.descAr : service.descEn}</p>
+                  
+                  <Button size="lg" className="w-full text-lg h-14 rounded-xl bg-gradient-to-r from-primary to-primary/80 hover:scale-[1.02] transition-transform shadow-lg shadow-primary/20" onClick={() => openBooking(service)}>
+                    {isAr ? 'احجز الجلسة' : 'Book Session'}
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+
+          {/* Packages Column */}
+          <div className="space-y-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center text-accent font-bold text-xl">2</div>
+              <h2 className="text-2xl font-bold">{isAr ? 'نظام الباقات الموفرة' : 'Savings Packages'}</h2>
+            </div>
+            
+            {services.filter(s => s.type === "package").map((service) => (
+              <Card key={service.id} className="p-8 border-2 border-accent/30 bg-gradient-to-br from-background to-accent/5 hover:border-accent hover:from-accent/10 hover:to-accent/5 transition-all hover:shadow-2xl hover:shadow-accent/20 group relative overflow-hidden">
+                {service.tagAr && (
+                  <div className="absolute top-0 right-0 bg-accent text-accent-foreground text-sm font-bold px-4 py-1.5 rounded-bl-xl shadow-md z-20">
+                    {isAr ? service.tagAr : service.tagEn}
+                  </div>
+                )}
+                <div className="absolute bottom-0 left-0 w-40 h-40 bg-accent/10 rounded-full blur-3xl -ml-20 -mb-20 group-hover:bg-accent/20 transition-colors"></div>
+                
+                <div className="relative z-10 flex flex-col h-full mt-2">
+                  <div className="flex justify-between items-start mb-4">
+                    <h3 className="text-2xl font-bold text-foreground group-hover:text-accent transition-colors">{isAr ? service.titleAr : service.titleEn}</h3>
+                    <div className="bg-accent text-accent-foreground px-4 py-2 rounded-full font-black text-lg shadow-sm whitespace-nowrap">
+                      {service.price} {isAr ? 'ج.م' : 'EGP'}
+                    </div>
+                  </div>
+                  <p className="text-muted-foreground leading-relaxed flex-1 mb-8 text-lg">{isAr ? service.descAr : service.descEn}</p>
+                  
+                  <Button size="lg" className="w-full text-lg h-14 rounded-xl bg-accent text-accent-foreground hover:bg-accent/90 hover:scale-[1.02] transition-transform shadow-lg shadow-accent/20" onClick={() => openBooking(service)}>
+                    {isAr ? 'احجز الباقة' : 'Book Package'}
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Booking Dialog Modal */}
+      <Dialog open={isBookingOpen} onOpenChange={setIsBookingOpen}>
+        <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden rounded-[2rem]">
+          <div className="bg-muted/50 p-6 border-b border-border flex justify-between items-center">
+            <div>
+              <h2 className="text-xl font-bold">{isAr ? 'تأكيد الحجز والدفع' : 'Confirm Booking & Payment'}</h2>
+              <p className="text-sm text-primary font-bold mt-1">
+                {isAr ? selectedService?.titleAr : selectedService?.titleEn} - {selectedService?.price} {isAr ? 'ج.م' : 'EGP'}
+              </p>
+            </div>
+          </div>
+          
+          <form className="p-6 space-y-6" onSubmit={handleBookingSubmit}>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-bold">{isAr ? 'الاسم الكريم' : 'Full Name'}</label>
+                <input name="name" placeholder={isAr ? 'اكتب اسمك هنا' : 'Enter your name'} className="flex h-12 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50" required />
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-bold">{isAr ? 'رقم الهاتف (للتواصل)' : 'Phone Number'}</label>
+                <input name="phone" placeholder={isAr ? 'رقم الموبايل / واتساب' : 'Mobile / WhatsApp'} className="flex h-12 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50" required />
               </div>
             </div>
 
-            {loading ? (
-              <div className="grid md:grid-cols-2 gap-6">
-                {[1, 2, 3, 4].map((i) => (
-                  <Card key={i} className="p-6 space-y-4">
-                    <div className="flex gap-4">
-                      <Skeleton className="w-20 h-20 rounded-lg" />
-                      <div className="flex-1 space-y-2">
-                        <Skeleton className="h-5 w-1/2" />
-                        <Skeleton className="h-4 w-1/3" />
-                        <Skeleton className="h-4 w-1/4" />
-                      </div>
-                    </div>
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-10 w-full" />
-                  </Card>
-                ))}
+            <div className="space-y-3 pt-4 border-t border-border">
+              <label className="text-sm font-bold">{isAr ? 'حول المبلغ على أحد الأرقام التالية' : 'Transfer the amount to one of these numbers'}</label>
+              
+              <div className="space-y-2">
+                <div className="p-3 rounded-xl bg-muted/30 border border-muted flex items-center justify-between group hover:border-primary/50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <Smartphone className="w-6 h-6 text-red-500" />
+                    <p className="font-bold text-sm">{isAr ? 'فودافون كاش' : 'Vodafone Cash'}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-mono font-bold bg-background px-2 py-1 rounded-md border border-border">01006119365</p>
+                    <button type="button" onClick={() => { navigator.clipboard.writeText('01006119365'); alert(isAr ? 'تم نسخ الرقم' : 'Number Copied'); }} className="p-1.5 bg-primary/10 text-primary rounded-md hover:bg-primary hover:text-white transition-colors">
+                      <Copy className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-muted/30 border border-muted flex items-center justify-between group hover:border-primary/50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <CreditCard className="w-6 h-6 text-purple-600" />
+                    <p className="font-bold text-sm">{isAr ? 'إنستا باي' : 'InstaPay'}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-mono font-bold bg-background px-2 py-1 rounded-md border border-border">01102553741</p>
+                    <button type="button" onClick={() => { navigator.clipboard.writeText('01102553741'); alert(isAr ? 'تم نسخ الرقم' : 'Number Copied'); }} className="p-1.5 bg-primary/10 text-primary rounded-md hover:bg-primary hover:text-white transition-colors">
+                      <Copy className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
               </div>
-            ) : doctors.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground text-lg mb-4">{t("search.noResults")}</p>
-                <Button variant="outline" onClick={() => {
-                  setSpecializationFilter('all')
-                  setCityFilter('all')
-                  setGenderFilter('all')
-                  setConsultationTypeFilter('all')
-                  setSearchTerm("")
-                }}>
-                  {t("search.clearFilters")}
-                </Button>
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-sm font-bold">{isAr ? 'إيصال الدفع (سكرين شوت التحويل)' : 'Payment Receipt Screenshot'}</label>
+              <div className="border-2 border-dashed border-primary/30 rounded-xl p-6 flex flex-col items-center justify-center gap-2 bg-primary/5 cursor-pointer hover:bg-primary/10 transition-colors relative group">
+                <Upload className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
+                <p className="font-medium text-sm text-primary">{isAr ? 'اضغط هنا لرفع صورة الإيصال' : 'Click to upload receipt'}</p>
+                <input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept="image/*" required />
               </div>
-            ) : (
-              <DoctorList doctors={doctors} t={t} isAr={isAr} isFiltering={isFiltering} formatPrice={formatPrice} />
-            )}
-          </main>
-        </div>
-      </div>
+            </div>
+
+            <Button type="submit" size="lg" className="w-full text-lg h-14 rounded-xl bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity">
+              {isAr ? 'تأكيد الحجز' : 'Confirm Booking'}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

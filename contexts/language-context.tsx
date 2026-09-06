@@ -18,7 +18,7 @@ const translations = {
     "nav.library": "Library",
     "nav.login": "Login",
     "nav.signup": "Sign Up",
-    "nav.findDoctor": "Find a Doctor",
+    "nav.findDoctor": "Book Your Session",
     "nav.donate": "Donate a Session",
     "nav.explore": "Explore",
     "nav.dashboard": "Dashboard",
@@ -108,7 +108,7 @@ const translations = {
     "donate.success": "Donated Successfully! Waiting for approval.",
 
     // Search Page
-    "search.title": "Find Your Doctor",
+    "search.title": "Choose Your Consultation",
     "search.loading": "Discovering best doctors...",
     "search.results": "specialists available right now",
     "search.pricing.therapist": "Therapist from 450 EGP",
@@ -171,7 +171,7 @@ const translations = {
     "doctors.online": "Online",
     "footer.description": "Your trusted partner in mental wellness. Connect with professionals who care.",
     "footer.forPatients": "For Patients",
-    "footer.findDoctor": "Find a Doctor",
+    "footer.findDoctor": "Book Your Session",
     "footer.patientSignup": "Patient Sign Up",
     "footer.forDoctors": "For Doctors",
     "footer.joinAsDoctor": "Join as Doctor",
@@ -184,7 +184,7 @@ const translations = {
     "nav.library": "المكتبة",
     "nav.login": "تسجيل الدخول",
     "nav.signup": "التسجيل",
-    "nav.findDoctor": "ابحث عن طبيب",
+    "nav.findDoctor": "احجز جلستك",
     "nav.donate": "تبرع بجلسة",
     "nav.explore": "استكشف",
     "nav.dashboard": "لوحة التحكم",
@@ -272,7 +272,7 @@ const translations = {
     "donate.success": "تم التبرع بنجاح! في انتظار المراجعة.",
 
     // Search Page
-    "search.title": "ابحث عن طبيبك",
+    "search.title": "اختر الاستشارة المناسبة",
     "search.loading": "نبحث عن أفضل الأطباء...",
     "search.results": "متخصص متاح الآن",
     "search.pricing.therapist": "أخصائي ثيرابيست من ٤٥٠ ج.م",
@@ -335,7 +335,7 @@ const translations = {
     "doctors.online": "أونلاين",
     "footer.description": "شريكك الموثوق في الصحة النفسية. تواصل مع محترفين يهتمون بك.",
     "footer.forPatients": "للمرضى",
-    "footer.findDoctor": "ابحث عن طبيب",
+    "footer.findDoctor": "احجز جلستك",
     "footer.patientSignup": "تسجيل مريض",
     "footer.forDoctors": "للأطباء",
     "footer.joinAsDoctor": "انضم كطبيب",

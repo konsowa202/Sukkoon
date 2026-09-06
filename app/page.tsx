@@ -140,191 +140,120 @@ function HomePageContent() {
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl -z-10 translate-x-1/3 -translate-y-1/3"></div>
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-accent/5 rounded-full blur-3xl -z-10 -translate-x-1/3 translate-y-1/3"></div>
         
-        <div className="container mx-auto px-4 max-w-4xl">
-          <div className="text-center mb-12 space-y-4">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <div className="text-center mb-16 space-y-4">
             <h2 className="text-4xl md:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">احجز جلستك بسهولة</h2>
-            <p className="text-lg text-muted-foreground">وفر وقتك، اختار نوع الجلسة وارفع إيصال الدفع واحنا هنتواصل معاك فوراً لتحديد الموعد مع أفضل المتخصصين.</p>
+            <p className="text-lg text-muted-foreground">{language === 'ar' ? 'وفر وقتك، اختار نوع الجلسة وارفع إيصال الدفع واحنا هنتواصل معاك فوراً لتحديد الموعد مع أفضل المتخصصين.' : 'Save time, choose the session type, upload the receipt and we will contact you immediately to schedule your appointment.'}</p>
           </div>
           
-          <Card className="p-8 border border-primary/20 shadow-2xl bg-background/80 backdrop-blur-xl rounded-3xl relative overflow-hidden">
-             <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-accent/5 pointer-events-none"></div>
-             
-             <form className="space-y-8 relative z-10" onSubmit={async (e) => {
-               e.preventDefault();
-               try {
-                 const token = localStorage.getItem('sukoon_token');
-                 const formData = new FormData(e.currentTarget);
-                 
-                 // Create a direct request without a specific doctor
-                 const response = await fetch('/api/appointments/request', {
-                   method: 'POST',
-                   headers: {
-                     'Content-Type': 'application/json',
-                     'Authorization': token ? `Bearer ${token}` : ''
-                   },
-                   body: JSON.stringify({
-                     patientName: formData.get('name'),
-                     phone: formData.get('phone'),
-                     type: 'online', // Default to online for easy book, can be changed later
-                     service: (formData.get('consultation') as string).includes('psychiatrist') 
-                       ? ((formData.get('consultation') as string).includes('package') ? 'باقة 4 جلسات - طبيب نفسي' : 'طبيب نفسي - جلسة واحدة')
-                       : ((formData.get('consultation') as string).includes('package') ? 'باقة 4 جلسات - أخصائي نفسي' : 'أخصائي نفسي - جلسة واحدة'),
-                     request_type: 'easy_book',
-                     request_message: 'طلب حجز سريع من الصفحة الرئيسية'
-                   })
-                 });
-                 if(response.ok) {
-                   alert('تم إرسال طلبك بنجاح! سيتم مراجعته والتواصل معك قريباً.');
-                   (e.target as HTMLFormElement).reset();
-                 } else {
-                   alert('تم إرسال طلبك بنجاح! سيتم مراجعته والتواصل معك قريباً.');
-                 }
-               } catch(err) {
-                 alert('تم إرسال طلبك بنجاح! سيتم مراجعته والتواصل معك قريباً.');
-               }
-             }}>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-3">
-                    <label className="text-base font-bold">الاسم الكريم</label>
-                    <input name="name" placeholder="اكتب اسمك هنا" className="flex h-12 w-full rounded-md border border-input bg-background/50 px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" required />
-                  </div>
-                  <div className="space-y-3">
-                    <label className="text-base font-bold">رقم الهاتف (للتواصل)</label>
-                    <input name="phone" placeholder="رقم الموبايل / واتساب" className="flex h-12 w-full rounded-md border border-input bg-background/50 px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" required />
-                  </div>
-                </div>
-
-                <div className="space-y-8">
-                  {/* Single Sessions */}
-                  <div>
-                    <label className="text-base font-bold flex items-center gap-2 mb-4 text-foreground">
-                      <span className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold shadow-md">1</span>
-                      حجز جلسة فردية
-                    </label>
-                    <div className="grid md:grid-cols-2 gap-4 pl-10">
-                      <label className="cursor-pointer group">
-                        <input type="radio" name="consultation" value="therapist" className="peer sr-only" required />
-                        <div className="p-5 rounded-2xl border-2 border-muted bg-background/50 peer-checked:border-primary peer-checked:bg-primary/5 transition-all hover:border-primary/30 h-full flex flex-col justify-between">
-                          <div>
-                            <div className="flex justify-between items-start mb-3">
-                              <h4 className="font-bold text-lg group-hover:text-primary transition-colors">أخصائي نفسي</h4>
-                              <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-black whitespace-nowrap">450 ج.م</span>
-                            </div>
-                            <p className="text-sm text-muted-foreground leading-relaxed">للدعم النفسي، وتعديل السلوك، وجلسات العلاج الكلامي. (جلسة واحدة)</p>
-                          </div>
-                        </div>
-                      </label>
-                      <label className="cursor-pointer group">
-                        <input type="radio" name="consultation" value="psychiatrist" className="peer sr-only" required />
-                        <div className="p-5 rounded-2xl border-2 border-muted bg-background/50 peer-checked:border-primary peer-checked:bg-primary/5 transition-all hover:border-primary/30 h-full flex flex-col justify-between">
-                          <div>
-                            <div className="flex justify-between items-start mb-3">
-                              <h4 className="font-bold text-lg group-hover:text-primary transition-colors">طبيب نفسي</h4>
-                              <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-black whitespace-nowrap">650 ج.م</span>
-                            </div>
-                            <p className="text-sm text-muted-foreground leading-relaxed">للتشخيص الطبي، ووصف الأدوية ومتابعة الحالات الإكلينيكية. (جلسة واحدة)</p>
-                          </div>
-                        </div>
-                      </label>
+          <div className="grid md:grid-cols-2 gap-12">
+            {/* Single Sessions Column */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl">1</div>
+                <h2 className="text-2xl font-bold">{language === 'ar' ? 'حجز جلسة فردية' : 'Single Session'}</h2>
+              </div>
+              
+              {[
+                {
+                  id: "therapist",
+                  titleAr: "أخصائي نفسي",
+                  titleEn: "Therapist",
+                  price: 450,
+                  descAr: "للدعم النفسي، وتعديل السلوك، وجلسات العلاج الكلامي. (جلسة واحدة)",
+                  descEn: "Psychological support, behavior modification, and talk therapy. (Single session)",
+                  type: "single"
+                },
+                {
+                  id: "psychiatrist",
+                  titleAr: "طبيب نفسي",
+                  titleEn: "Psychiatrist",
+                  price: 650,
+                  descAr: "للتشخيص الطبي، ووصف الأدوية ومتابعة الحالات الإكلينيكية. (جلسة واحدة)",
+                  descEn: "Medical diagnosis, prescribing medications, and clinical follow-up. (Single session)",
+                  type: "single"
+                }
+              ].map((service) => (
+                <Card key={service.id} className="p-8 border border-primary/20 hover:border-primary/50 transition-all hover:shadow-xl hover:shadow-primary/5 group relative overflow-hidden bg-card/60 backdrop-blur-xl">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors"></div>
+                  
+                  <div className="relative z-10 flex flex-col h-full">
+                    <div className="flex justify-between items-start mb-4">
+                      <h3 className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors">{language === 'ar' ? service.titleAr : service.titleEn}</h3>
+                      <div className="bg-primary/10 text-primary px-4 py-2 rounded-full font-black text-lg shadow-sm whitespace-nowrap">
+                        {service.price} {language === 'ar' ? 'ج.م' : 'EGP'}
+                      </div>
                     </div>
+                    <p className="text-muted-foreground leading-relaxed flex-1 mb-8 text-lg">{language === 'ar' ? service.descAr : service.descEn}</p>
+                    
+                    <Button size="lg" className="w-full text-lg h-14 rounded-xl bg-gradient-to-r from-primary to-primary/80 hover:scale-[1.02] transition-transform shadow-lg shadow-primary/20" onClick={() => {
+                        window.location.href = "/patient/search";
+                    }}>
+                      {language === 'ar' ? 'احجز الجلسة' : 'Book Session'}
+                    </Button>
                   </div>
+                </Card>
+              ))}
+            </div>
 
-                  {/* Separator */}
-                  <div className="relative pl-10 py-2">
-                    <div className="absolute inset-0 flex items-center pl-10" aria-hidden="true">
-                      <div className="w-full border-t border-dashed border-primary/30"></div>
+            {/* Packages Column */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center text-accent font-bold text-xl">2</div>
+                <h2 className="text-2xl font-bold">{language === 'ar' ? 'نظام الباقات الموفرة' : 'Savings Packages'}</h2>
+              </div>
+              
+              {[
+                {
+                  id: "therapist_package",
+                  titleAr: "باقة 4 جلسات أخصائي",
+                  titleEn: "Therapist Package (4 Sessions)",
+                  price: 1800,
+                  descAr: "باقة متكاملة للمتابعة المستمرة بسعر موفر، التزام بيضمنلك نتيجة أفضل.",
+                  descEn: "A comprehensive package for continuous follow-up at a discounted price.",
+                  type: "package",
+                  tagAr: "الأكثر طلباً",
+                  tagEn: "Most Popular"
+                },
+                {
+                  id: "psychiatrist_package",
+                  titleAr: "باقة 4 جلسات طبيب",
+                  titleEn: "Psychiatrist Package (4 Sessions)",
+                  price: 2600,
+                  descAr: "باقة المتابعة الدورية الشاملة مع الطبيب النفسي لضمان استقرار الحالة.",
+                  descEn: "Comprehensive periodic follow-up package with a psychiatrist.",
+                  type: "package",
+                  tagAr: "باقة التوفير",
+                  tagEn: "Savings Package"
+                }
+              ].map((service) => (
+                <Card key={service.id} className="p-8 border-2 border-accent/30 bg-gradient-to-br from-background to-accent/5 hover:border-accent hover:from-accent/10 hover:to-accent/5 transition-all hover:shadow-2xl hover:shadow-accent/20 group relative overflow-hidden">
+                  {service.tagAr && (
+                    <div className="absolute top-0 right-0 bg-accent text-accent-foreground text-sm font-bold px-4 py-1.5 rounded-bl-xl shadow-md z-20">
+                      {language === 'ar' ? service.tagAr : service.tagEn}
                     </div>
-                    <div className="relative flex justify-center">
-                      <span className="bg-background/80 backdrop-blur-sm px-4 text-sm font-black text-primary flex items-center gap-2">
-                        <Star className="w-4 h-4 fill-primary" />
-                        أو اختار من الباقات (أوفر ليك)
-                        <Star className="w-4 h-4 fill-primary" />
-                      </span>
+                  )}
+                  <div className="absolute bottom-0 left-0 w-40 h-40 bg-accent/10 rounded-full blur-3xl -ml-20 -mb-20 group-hover:bg-accent/20 transition-colors"></div>
+                  
+                  <div className="relative z-10 flex flex-col h-full mt-2">
+                    <div className="flex justify-between items-start mb-4">
+                      <h3 className="text-2xl font-bold text-foreground group-hover:text-accent transition-colors">{language === 'ar' ? service.titleAr : service.titleEn}</h3>
+                      <div className="bg-accent text-accent-foreground px-4 py-2 rounded-full font-black text-lg shadow-sm whitespace-nowrap">
+                        {service.price} {language === 'ar' ? 'ج.م' : 'EGP'}
+                      </div>
                     </div>
+                    <p className="text-muted-foreground leading-relaxed flex-1 mb-8 text-lg">{language === 'ar' ? service.descAr : service.descEn}</p>
+                    
+                    <Button size="lg" className="w-full text-lg h-14 rounded-xl bg-accent text-accent-foreground hover:bg-accent/90 hover:scale-[1.02] transition-transform shadow-lg shadow-accent/20" onClick={() => {
+                        window.location.href = "/patient/search";
+                    }}>
+                      {language === 'ar' ? 'احجز الباقة' : 'Book Package'}
+                    </Button>
                   </div>
-
-                  {/* Packages */}
-                  <div>
-                    <label className="text-base font-bold flex items-center gap-2 mb-4 text-foreground">
-                      <span className="w-8 h-8 rounded-full bg-accent text-accent-foreground flex items-center justify-center font-bold shadow-md">2</span>
-                      نظام الباقات الموفرة
-                    </label>
-                    <div className="grid md:grid-cols-2 gap-4 pl-10">
-                      <label className="cursor-pointer group">
-                        <input type="radio" name="consultation" value="therapist_package" className="peer sr-only" required />
-                        <div className="p-5 rounded-2xl border-2 border-accent/20 bg-gradient-to-br from-background to-accent/5 peer-checked:border-accent peer-checked:from-accent/10 peer-checked:to-accent/5 transition-all hover:border-accent/50 h-full relative overflow-hidden flex flex-col justify-between">
-                          <div className="absolute top-0 right-0 bg-accent text-accent-foreground text-xs font-bold px-3 py-1 rounded-bl-xl shadow-sm">الأكثر طلباً</div>
-                          <div className="mt-2">
-                            <div className="flex justify-between items-start mb-3">
-                              <h4 className="font-bold text-lg text-accent-foreground group-hover:text-accent transition-colors">باقة أخصائي (4 جلسات)</h4>
-                              <span className="bg-accent/20 text-accent-foreground px-3 py-1 rounded-full text-sm font-black whitespace-nowrap shadow-sm">1800 ج.م</span>
-                            </div>
-                            <p className="text-sm text-muted-foreground leading-relaxed">باقة متكاملة للمتابعة المستمرة بسعر موفر، التزام بيضمنلك نتيجة أفضل.</p>
-                          </div>
-                        </div>
-                      </label>
-                      <label className="cursor-pointer group">
-                        <input type="radio" name="consultation" value="psychiatrist_package" className="peer sr-only" required />
-                        <div className="p-5 rounded-2xl border-2 border-accent/20 bg-gradient-to-br from-background to-accent/5 peer-checked:border-accent peer-checked:from-accent/10 peer-checked:to-accent/5 transition-all hover:border-accent/50 h-full relative overflow-hidden flex flex-col justify-between">
-                          <div className="absolute top-0 right-0 bg-accent text-accent-foreground text-xs font-bold px-3 py-1 rounded-bl-xl shadow-sm">باقة التوفير</div>
-                          <div className="mt-2">
-                            <div className="flex justify-between items-start mb-3">
-                              <h4 className="font-bold text-lg text-accent-foreground group-hover:text-accent transition-colors">باقة طبيب (4 جلسات)</h4>
-                              <span className="bg-accent/20 text-accent-foreground px-3 py-1 rounded-full text-sm font-black whitespace-nowrap shadow-sm">2600 ج.م</span>
-                            </div>
-                            <p className="text-sm text-muted-foreground leading-relaxed">باقة المتابعة الدورية الشاملة مع الطبيب النفسي لضمان استقرار الحالة.</p>
-                          </div>
-                        </div>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-4 pt-4 border-t border-border">
-                  <label className="text-base font-bold">طريقة الدفع المتاحة</label>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="p-4 rounded-xl bg-muted/30 border border-muted flex items-center gap-4 group hover:border-primary/50 transition-colors">
-                       <Smartphone className="w-8 h-8 text-red-500 flex-shrink-0" />
-                       <div className="flex-1">
-                         <p className="font-bold">فودافون كاش</p>
-                         <div className="flex items-center gap-2 mt-1">
-                           <p className="text-sm text-muted-foreground font-mono bg-background px-2 py-1 rounded-md">01006119365</p>
-                           <button type="button" onClick={() => { navigator.clipboard.writeText('01006119365'); alert('تم نسخ الرقم'); }} className="p-1.5 bg-primary/10 text-primary rounded-md hover:bg-primary hover:text-white transition-colors" title="نسخ الرقم">
-                             <Copy className="w-3.5 h-3.5" />
-                           </button>
-                         </div>
-                       </div>
-                    </div>
-                    <div className="p-4 rounded-xl bg-muted/30 border border-muted flex items-center gap-4 group hover:border-primary/50 transition-colors">
-                       <CreditCard className="w-8 h-8 text-purple-600 flex-shrink-0" />
-                       <div className="flex-1">
-                         <p className="font-bold">إنستا باي (InstaPay)</p>
-                         <div className="flex items-center gap-2 mt-1">
-                           <p className="text-sm text-muted-foreground font-mono bg-background px-2 py-1 rounded-md">01102553741</p>
-                           <button type="button" onClick={() => { navigator.clipboard.writeText('01102553741'); alert('تم نسخ الرقم'); }} className="p-1.5 bg-primary/10 text-primary rounded-md hover:bg-primary hover:text-white transition-colors" title="نسخ الرقم">
-                             <Copy className="w-3.5 h-3.5" />
-                           </button>
-                         </div>
-                       </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <label className="text-base font-bold">إيصال الدفع (سكرين شوت)</label>
-                  <div className="border-2 border-dashed border-primary/30 rounded-xl p-8 flex flex-col items-center justify-center gap-2 bg-primary/5 cursor-pointer hover:bg-primary/10 transition-colors relative">
-                    <Upload className="w-8 h-8 text-primary" />
-                    <p className="font-medium">اضغط هنا لرفع صورة الإيصال</p>
-                    <p className="text-sm text-muted-foreground">صورة بصيغة JPG أو PNG</p>
-                    <input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept="image/*" required />
-                  </div>
-                </div>
-
-                <Button type="submit" size="lg" className="w-full text-lg h-14 rounded-xl bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity">
-                  تأكيد الحجز وإرسال الطلب
-                </Button>
-             </form>
-          </Card>
+                </Card>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
