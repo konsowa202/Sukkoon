@@ -9,11 +9,13 @@ import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { type Doctor } from "@/lib/fallback-data"
 import { useLanguage } from "@/contexts/language-context"
+import { useLocation } from "@/contexts/location-context"
 import { Skeleton } from "@/components/ui/skeleton"
 import { EGYPTIAN_GOVERNORATES, DOCTOR_SPECIALIZATIONS } from "@/lib/constants"
 
 export function FeaturedDoctors() {
     const { t, language } = useLanguage()
+    const { formatPrice } = useLocation()
     const isAr = language === "ar"
     const [doctors, setDoctors] = useState<Doctor[]>([])
     const [loading, setLoading] = useState(true)
@@ -128,7 +130,7 @@ export function FeaturedDoctors() {
                                             <div className="space-y-0.5">
                                                 <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">{t("doctors.startingFrom")}</p>
                                                 <p className="text-lg font-black text-foreground">
-                                                    {doctor.priceOnline} <span className="text-xs font-normal text-muted-foreground">{t("currency.egp")}</span>
+                                                    {formatPrice(doctor.priceOnline, doctor.specialization)}
                                                 </p>
                                             </div>
                                             <Button size="sm" asChild className="shadow-lg shadow-primary/20">

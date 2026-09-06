@@ -2,7 +2,7 @@
 
 import { useState, useEffect, memo } from "react"
 
-const DoctorCard = memo(({ doctor, t, isAr }: { doctor: Doctor, t: any, isAr: boolean }) => {
+const DoctorCard = memo(({ doctor, t, isAr, formatPrice }: { doctor: Doctor, t: any, isAr: boolean, formatPrice: (price: number, spec?: string) => string }) => {
   // Find localized governorate
   const gov = EGYPTIAN_GOVERNORATES.find(g => g.en.toLowerCase() === doctor.city?.toLowerCase());
   const localizedCity = gov ? (isAr ? gov.ar : gov.en) : doctor.city;
@@ -61,7 +61,7 @@ const DoctorCard = memo(({ doctor, t, isAr }: { doctor: Doctor, t: any, isAr: bo
             <div className="flex items-center gap-1">
               <Video className="w-4 h-4 text-primary" />
               <span className="font-semibold text-foreground">
-                {doctor.priceOnline} {t("currency.egp")}
+                {formatPrice(doctor.priceOnline, doctor.specialization)}
               </span>
             </div>
           )}
@@ -77,10 +77,10 @@ const DoctorCard = memo(({ doctor, t, isAr }: { doctor: Doctor, t: any, isAr: bo
 })
 DoctorCard.displayName = "DoctorCard"
 
-const DoctorList = memo(({ doctors, t, isAr, isFiltering }: { doctors: Doctor[], t: any, isAr: boolean, isFiltering: boolean }) => (
+const DoctorList = memo(({ doctors, t, isAr, isFiltering, formatPrice }: { doctors: Doctor[], t: any, isAr: boolean, isFiltering: boolean, formatPrice: (price: number, spec?: string) => string }) => (
   <div className={`grid md:grid-cols-2 gap-6 ${isFiltering ? 'opacity-50 pointer-events-none transition-opacity' : ''}`}>
     {doctors.map((doctor) => (
-      <DoctorCard key={doctor.id} doctor={doctor} t={t} isAr={isAr} />
+      <DoctorCard key={doctor.id} doctor={doctor} t={t} isAr={isAr} formatPrice={formatPrice} />
     ))}
   </div>
 ))
@@ -97,6 +97,7 @@ import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import { HeaderNav } from "@/components/header-nav"
 import { useLanguage } from "@/contexts/language-context"
+import { useLocation } from "@/contexts/location-context"
 import { useAuth } from "@/contexts/auth-context"
 import { Skeleton } from "@/components/ui/skeleton"
 import { EGYPTIAN_GOVERNORATES, DOCTOR_SPECIALIZATIONS } from "@/lib/constants"
@@ -276,6 +277,7 @@ export default function SearchDoctorsPage() {
   const [cityFilter, setCityFilter] = useState("all")
   const debouncedSearchTerm = useDebounce(searchTerm, 800)
   const { t, language } = useLanguage()
+  const { formatPrice } = useLocation()
   const isAr = language === "ar"
   const { user, isLoading: authLoading } = useAuth()
 
@@ -446,7 +448,7 @@ export default function SearchDoctorsPage() {
                 </Button>
               </div>
             ) : (
-              <DoctorList doctors={doctors} t={t} isAr={isAr} isFiltering={isFiltering} />
+              <DoctorList doctors={doctors} t={t} isAr={isAr} isFiltering={isFiltering} formatPrice={formatPrice} />
             )}
           </main>
         </div>

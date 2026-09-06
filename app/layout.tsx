@@ -6,6 +6,7 @@ import "./globals.css"
 import { AuthProvider } from "@/contexts/auth-context"
 import { ThemeProvider } from "@/contexts/theme-context"
 import { LanguageProvider } from "@/contexts/language-context"
+import { LocationProvider } from "@/contexts/location-context"
 import { Toaster } from "@/hooks/use-toast"
 
 const _geist = Geist({ subsets: ["latin"], variable: "--font-geist" })
@@ -20,7 +21,7 @@ const _ibmArabic = IBM_Plex_Sans_Arabic({
 export const metadata: Metadata = {
   title: "سكون للصحة النفسية | معاك خطوة بخطوة",
   description: "سكون: منصة التواصل مع نخبة من أطباء ومعالجي الصحة النفسية. ابدأ رحلة التعافي الآن بخصوصية تامة واحترافية.",
-  keywords: "صحة نفسية, علاج نفسي, اكتئاب, قلق, توتر, وسواس قهري, إدمان, أفضل منصة علاج نفسي, دكتور نفسي أونلاين, سكون",
+  keywords: "منصة سكون, سكون, جمعية سكون, sukun therapy, skoun, سكون الشفا, سكون جدة, sukoon, سُكون, سكونك, عيادة سكون, سكون النفس, شات سكون, جلسات سكون, سكون كير, elhakem, سكون ميد, مركز سكون, سُكُون, سکون, سكون 5, sukoon m, جمعية سكون للصحة النفسية, مستشفى سكون, sukoon health, السكون, هل هو امن, where is sukoon located, رهاب الساح, sukoon iec, مركز سكون للاستشارات الأسرية والنفسية والتدريب, مركز سأكون, مركز سكون جدة, explain in english, sukoin, برنامج سكون, دكتور نفسى اونلاين, sukoon., هل تنصحني بيه, psykongrooen, www.sukoon.com, ما هذا البرنامج, sukoon community, سكون سمارت, suookn, hello sukoon, my sukoon, sukoon counselling, sukoon wellness treatment, سكون لوجو, sukoon healing, sukoon login, #سكون, sukoon rehab, sukoon.com, مركز سكون للطب النفسي وعلاج الادمان, sukoon cares, sukoon therapy and consulting, عالم السكون, sukoon. com, sokoon, مستشفى سكون جدة, socoon, sukoon hospital jeddah, سكون الروح, مركز سكون الطائف, sukoon com, skun, sukh solutions, sukoon psychotherapy center, سكون للرعاية الممتدة, مركز سكون للرعاية الممتدة, sukoon psychotherapy",
   openGraph: {
     title: "سكون للصحة النفسية | معاك خطوة بخطوة",
     description: "سكون: منصة التواصل مع نخبة من أطباء ومعالجي الصحة النفسية. ابدأ رحلة التعافي الآن مع سكون.",
@@ -72,10 +73,12 @@ export default function RootLayout({
       <body className={`${_geist.variable} ${_geistMono.variable} ${_ibmArabic.variable} font-sans antialiased text-pretty`}>
         <ThemeProvider>
           <LanguageProvider>
-            <AuthProvider>
-              {children}
-              <Toaster />
-            </AuthProvider>
+            <LocationProvider>
+              <AuthProvider>
+                {children}
+                <Toaster />
+              </AuthProvider>
+            </LocationProvider>
           </LanguageProvider>
         </ThemeProvider>
         <Analytics />

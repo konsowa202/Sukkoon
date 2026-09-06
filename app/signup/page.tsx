@@ -10,10 +10,24 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import Link from "next/link"
 import Image from "next/image"
 import { Loader2, UserCircle, Stethoscope } from "lucide-react"
 import { useSearchParams } from "next/navigation"
+import { useLocation } from "@/contexts/location-context"
+
+const COUNTRY_DIAL_CODES = [
+  { code: "+20", label: "🇪🇬 Egypt (+20)" },
+  { code: "+966", label: "🇸🇦 Saudi Arabia (+966)" },
+  { code: "+971", label: "🇦🇪 UAE (+971)" },
+  { code: "+965", label: "🇰🇼 Kuwait (+965)" },
+  { code: "+974", label: "🇶🇦 Qatar (+974)" },
+  { code: "+968", label: "🇴🇲 Oman (+968)" },
+  { code: "+973", label: "🇧🇭 Bahrain (+973)" },
+  { code: "+44", label: "🇬🇧 UK (+44)" },
+  { code: "+1", label: "🇺🇸 US/CA (+1)" },
+]
 
 function SignupPageContent() {
   const [email, setEmail] = useState("")
@@ -28,6 +42,11 @@ function SignupPageContent() {
   const searchParams = useSearchParams()
   const defaultRole = searchParams.get("role") === "doctor" ? "doctor" : "patient"
   const [selectedRole, setSelectedRole] = useState<"doctor" | "patient">(defaultRole)
+  const { countryCode: userLocationCountryCode } = useLocation()
+  
+  // Default to +20, or +966 for GULF, or +44 for EU
+  const initialDialCode = userLocationCountryCode === "GULF" ? "+966" : userLocationCountryCode === "EU" ? "+44" : "+20"
+  const [dialCode, setDialCode] = useState(initialDialCode)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -45,7 +64,8 @@ function SignupPageContent() {
 
     setLoading(true)
 
-    const success = await register(email, password, name, selectedRole, phone)
+    const fullPhone = phone.startsWith('+') ? phone : `${dialCode}${phone}`
+    const success = await register(email, password, name, selectedRole, fullPhone)
 
     if (success) {
       // Small delay to ensure cookies are set
@@ -103,14 +123,30 @@ function SignupPageContent() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="phone">{t("auth.phone") || "Phone Number"}</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="01xxxxxxxxx"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    required
-                  />
+                  <div className="flex gap-2">
+                    <Select value={dialCode} onValueChange={setDialCode}>
+                      <SelectTrigger className="w-[120px] shrink-0 text-xs">
+                        <SelectValue placeholder="Code" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {COUNTRY_DIAL_CODES.map((c) => (
+                          <SelectItem key={c.code} value={c.code} className="text-xs">
+                            {c.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="1xxxxxxxxx"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      required
+                      className="flex-1"
+                      dir="ltr"
+                    />
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">{t("auth.email")}</Label>
@@ -177,14 +213,30 @@ function SignupPageContent() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="doctorPhone">{t("auth.phone") || "Phone Number"}</Label>
-                  <Input
-                    id="doctorPhone"
-                    type="tel"
-                    placeholder="01xxxxxxxxx"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    required
-                  />
+                  <div className="flex gap-2">
+                    <Select value={dialCode} onValueChange={setDialCode}>
+                      <SelectTrigger className="w-[120px] shrink-0 text-xs">
+                        <SelectValue placeholder="Code" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {COUNTRY_DIAL_CODES.map((c) => (
+                          <SelectItem key={c.code} value={c.code} className="text-xs">
+                            {c.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      id="doctorPhone"
+                      type="tel"
+                      placeholder="1xxxxxxxxx"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      required
+                      className="flex-1"
+                      dir="ltr"
+                    />
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="doctorEmail">{t("auth.email")}</Label>
