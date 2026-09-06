@@ -5,8 +5,8 @@ export const sendAdminNotification = async (subject: string, htmlContent: string
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'Origin': 'https://sukoon.com',
-        'Referer': 'https://sukoon.com'
+        'Origin': 'https://suukoon.com',
+        'Referer': 'https://suukoon.com'
       },
       body: JSON.stringify({
         _subject: subject,
