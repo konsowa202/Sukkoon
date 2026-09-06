@@ -3,16 +3,21 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Star, ArrowLeft, Upload, Smartphone, CreditCard, Copy } from "lucide-react"
+import { Star, ArrowLeft, Upload, Smartphone, CreditCard, Copy, Loader2 } from "lucide-react"
 import { HeaderNav } from "@/components/header-nav"
 import { useLanguage } from "@/contexts/language-context"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { useAuth } from "@/contexts/auth-context"
+import { useRouter } from "next/navigation"
 
 export default function GenericBookingPage() {
   const { t, language } = useLanguage()
   const isAr = language === "ar"
+  const { user } = useAuth()
+  const router = useRouter()
   const [selectedService, setSelectedService] = useState<any>(null)
   const [isBookingOpen, setIsBookingOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const services = [
     {
@@ -58,27 +63,66 @@ export default function GenericBookingPage() {
   ]
 
   const openBooking = (service: any) => {
+    if (!user) {
+       alert(isAr ? 'يجب تسجيل الدخول أولاً لحجز الجلسة' : 'You must log in first to book a session');
+       router.push('/login');
+       return;
+    }
     setSelectedService(service)
     setIsBookingOpen(true)
   }
 
   const handleBookingSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!user) {
+        alert(isAr ? 'يجب تسجيل الدخول أولاً' : 'You must log in first');
+        return;
+    }
+    setIsSubmitting(true);
     try {
       const formData = new FormData(e.currentTarget);
+      const token = localStorage.getItem('sukoon_token');
       
+      // 1. Upload proof image
+      const file = formData.get('receipt') as File;
+      let proofUrl = '';
+      if (file && file.size > 0) {
+         const uploadData = new FormData();
+         uploadData.append('file', file);
+         uploadData.append('folder', 'payment-proofs');
+         uploadData.append('bucket', 'payment-proofs');
+         
+         const uploadRes = await fetch('/api/upload', {
+            method: 'POST',
+            headers: { 'Authorization': token ? `Bearer ${token}` : '' },
+            body: uploadData
+         });
+         if (uploadRes.ok) {
+            const data = await uploadRes.json();
+            proofUrl = data.url;
+         } else {
+            throw new Error('Failed to upload receipt');
+         }
+      } else {
+         throw new Error('Receipt image is required');
+      }
+
+      // 2. Submit booking request
       const response = await fetch('/api/appointments/request', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
         },
         body: JSON.stringify({
-          patientName: formData.get('name'),
           phone: formData.get('phone'),
           type: 'online', 
           service: selectedService?.titleAr || 'خدمة غير محددة',
           request_type: 'easy_book',
-          request_message: 'طلب حجز سريع من صفحة حجز الجلسات'
+          request_message: 'طلب حجز سريع من صفحة حجز الجلسات',
+          amount: selectedService?.price,
+          proofUrl,
+          paymentMethod: 'vodafone_cash' // Or read from a selected method if you add radio buttons for it
         })
       });
 
@@ -86,10 +130,13 @@ export default function GenericBookingPage() {
         alert(isAr ? 'تم إرسال طلبك بنجاح! سيتم مراجعته والتواصل معك قريباً.' : 'Your request has been submitted successfully! We will contact you soon.');
         setIsBookingOpen(false);
       } else {
-        alert(isAr ? 'حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى.' : 'An error occurred. Please try again.');
+        const errorData = await response.json();
+        alert(isAr ? `حدث خطأ: ${errorData.error}` : `Error: ${errorData.error}`);
       }
-    } catch(err) {
-      alert(isAr ? 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.' : 'An unexpected error occurred. Please try again.');
+    } catch(err: any) {
+      alert(isAr ? `حدث خطأ: ${err.message}` : `Error: ${err.message}`);
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -229,12 +276,12 @@ export default function GenericBookingPage() {
               <div className="border-2 border-dashed border-primary/30 rounded-xl p-6 flex flex-col items-center justify-center gap-2 bg-primary/5 cursor-pointer hover:bg-primary/10 transition-colors relative group">
                 <Upload className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
                 <p className="font-medium text-sm text-primary">{isAr ? 'اضغط هنا لرفع صورة الإيصال' : 'Click to upload receipt'}</p>
-                <input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept="image/*" required />
+                <input type="file" name="receipt" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept="image/*" required disabled={isSubmitting} />
               </div>
             </div>
 
-            <Button type="submit" size="lg" className="w-full text-lg h-14 rounded-xl bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity">
-              {isAr ? 'تأكيد الحجز' : 'Confirm Booking'}
+            <Button type="submit" size="lg" className="w-full text-lg h-14 rounded-xl bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity" disabled={isSubmitting}>
+              {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : (isAr ? 'تأكيد الحجز' : 'Confirm Booking')}
             </Button>
           </form>
         </DialogContent>
