@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
       doctorId: a.doctor_id,
       doctorName: a.request_type === 'easy_book' ? 'فريق سكون (سيتم تحديد أخصائي)' : (a.doctor?.users?.name || 'Dr. Unknown'),
       date: a.date,
-      time: a.time,
+      time: a.request_type === 'easy_book' && a.time === '00:00:00' ? 'سيتم تحديده لاحقاً' : (a.time ? a.time.substring(0, 5) : ''),
       type: a.type,
       status: a.status,
       service: a.service || 'Consultation',

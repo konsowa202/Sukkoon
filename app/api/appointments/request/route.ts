@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
       .insert({
         patient_id: payload.userId,
         date: new Date().toISOString().split('T')[0], // Today's date
-        time: 'TBD',
+        time: '00:00',
         type: type || 'online',
         status: 'pending',
         service: service || 'Consultation',
