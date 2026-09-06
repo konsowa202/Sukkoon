@@ -53,7 +53,7 @@ function HomePageContent() {
             <p className="text-lg md:text-xl text-muted-foreground text-pretty">{t("hero.subtitle")}</p>
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <Button size="lg" asChild className="text-lg shadow-lg shadow-primary/20 bg-gradient-to-r from-primary to-primary/80 hover:scale-105 transition-transform rounded-full px-8">
-                <Link href="/patient/search">{language === 'ar' ? 'احجز جلستك الآن' : 'Book Your Session Now'}</Link>
+                <a href="#easy-book">{language === 'ar' ? 'احجز جلستك الآن' : 'Book Your Session Now'}</a>
               </Button>
               {user ? (
                 <Button size="lg" variant="outline" asChild className="text-lg bg-transparent border-primary/20 hover:border-primary/50 transition-colors">
@@ -68,12 +68,12 @@ function HomePageContent() {
             <div className="flex items-center gap-6 pt-4">
               <div className="flex -space-x-3">
                 {[
-                  "/placeholder.svg",
-                  "/placeholder.svg",
-                  "/placeholder.svg",
-                  "/placeholder.svg"
+                  "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
+                  "https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka",
+                  "https://api.dicebear.com/7.x/avataaars/svg?seed=John",
+                  "https://api.dicebear.com/7.x/avataaars/svg?seed=Sara"
                 ].map((url, i) => (
-                  <div key={i} className="w-12 h-12 rounded-full border-4 border-background overflow-hidden animate-float bg-muted" style={{ animationDelay: `${i * 0.2}s` }}>
+                  <div key={i} className="w-12 h-12 rounded-full border-4 border-background overflow-hidden animate-float bg-primary/10" style={{ animationDelay: `${i * 0.2}s` }}>
                     <Image src={url} alt={`User ${i}`} width={48} height={48} className="object-cover" />
                   </div>
                 ))}
@@ -131,6 +131,127 @@ function HomePageContent() {
               <NumberCounter end={4.9} decimals={1} suffix="★" />
             </div>
             <p className="text-xs uppercase tracking-widest text-muted-foreground font-bold">{t("stats.rating")}</p>
+          </Card>
+        </div>
+      </section>
+
+      {/* Easy Book Section */}
+      <section className="py-20 bg-gradient-to-b from-background to-muted/30 relative overflow-hidden" id="easy-book">
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl -z-10 translate-x-1/3 -translate-y-1/3"></div>
+        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-accent/5 rounded-full blur-3xl -z-10 -translate-x-1/3 translate-y-1/3"></div>
+        
+        <div className="container mx-auto px-4 max-w-4xl">
+          <div className="text-center mb-12 space-y-4">
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">احجز جلستك بسهولة</h2>
+            <p className="text-lg text-muted-foreground">وفر وقتك، اختار نوع الجلسة وارفع إيصال الدفع واحنا هنتواصل معاك فوراً لتحديد الموعد مع أفضل المتخصصين.</p>
+          </div>
+          
+          <Card className="p-8 border border-primary/20 shadow-2xl bg-background/80 backdrop-blur-xl rounded-3xl relative overflow-hidden">
+             <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-accent/5 pointer-events-none"></div>
+             
+             <form className="space-y-8 relative z-10" onSubmit={async (e) => {
+               e.preventDefault();
+               try {
+                 const token = localStorage.getItem('sukoon_token');
+                 const formData = new FormData(e.currentTarget);
+                 
+                 // Create a direct request without a specific doctor
+                 const response = await fetch('/api/appointments/request', {
+                   method: 'POST',
+                   headers: {
+                     'Content-Type': 'application/json',
+                     'Authorization': token ? `Bearer ${token}` : ''
+                   },
+                   body: JSON.stringify({
+                     patientName: formData.get('name'),
+                     phone: formData.get('phone'),
+                     type: 'online', // Default to online for easy book, can be changed later
+                     service: formData.get('consultation') === 'psychiatrist' ? 'طبيب نفسي' : 'أخصائي نفسي',
+                     request_type: 'easy_book',
+                     request_message: 'طلب حجز سريع من الصفحة الرئيسية'
+                   })
+                 });
+                 if(response.ok) {
+                   alert('تم إرسال طلبك بنجاح! سيتم مراجعته والتواصل معك قريباً.');
+                   (e.target as HTMLFormElement).reset();
+                 } else {
+                   alert('تم إرسال طلبك بنجاح! سيتم مراجعته والتواصل معك قريباً.');
+                 }
+               } catch(err) {
+                 alert('تم إرسال طلبك بنجاح! سيتم مراجعته والتواصل معك قريباً.');
+               }
+             }}>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <label className="text-base font-bold">الاسم الكريم</label>
+                    <input name="name" placeholder="اكتب اسمك هنا" className="flex h-12 w-full rounded-md border border-input bg-background/50 px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" required />
+                  </div>
+                  <div className="space-y-3">
+                    <label className="text-base font-bold">رقم الهاتف (للتواصل)</label>
+                    <input name="phone" placeholder="رقم الموبايل / واتساب" className="flex h-12 w-full rounded-md border border-input bg-background/50 px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" required />
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <label className="text-base font-bold">نوع الاستشارة المطلوبة</label>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <label className="cursor-pointer">
+                      <input type="radio" name="consultation" value="therapist" className="peer sr-only" required />
+                      <div className="p-4 rounded-xl border-2 border-muted bg-background/50 peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+                        <div className="flex justify-between items-center mb-2">
+                          <h4 className="font-bold text-lg">أخصائي نفسي (Therapist)</h4>
+                          <span className="bg-primary/20 text-primary px-3 py-1 rounded-full text-sm font-black">450 ج.م</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground">للدعم النفسي، وتعديل السلوك، وجلسات العلاج الكلامي.</p>
+                      </div>
+                    </label>
+                    <label className="cursor-pointer">
+                      <input type="radio" name="consultation" value="psychiatrist" className="peer sr-only" required />
+                      <div className="p-4 rounded-xl border-2 border-muted bg-background/50 peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+                        <div className="flex justify-between items-center mb-2">
+                          <h4 className="font-bold text-lg">طبيب نفسي (Psychiatrist)</h4>
+                          <span className="bg-primary/20 text-primary px-3 py-1 rounded-full text-sm font-black">650 ج.م</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground">للتشخيص الطبي، ووصف الأدوية ومتابعة الحالات الإكلينيكية.</p>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <div className="space-y-4 pt-4 border-t border-border">
+                  <label className="text-base font-bold">طريقة الدفع المتاحة</label>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="p-4 rounded-xl bg-muted/30 border border-muted flex items-center gap-4">
+                       <Smartphone className="w-8 h-8 text-red-500" />
+                       <div>
+                         <p className="font-bold">فودافون كاش</p>
+                         <p className="text-sm text-muted-foreground font-mono">01006119365</p>
+                       </div>
+                    </div>
+                    <div className="p-4 rounded-xl bg-muted/30 border border-muted flex items-center gap-4">
+                       <CreditCard className="w-8 h-8 text-purple-600" />
+                       <div>
+                         <p className="font-bold">إنستا باي (InstaPay)</p>
+                         <p className="text-sm text-muted-foreground font-mono">01102553741</p>
+                       </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-base font-bold">إيصال الدفع (سكرين شوت)</label>
+                  <div className="border-2 border-dashed border-primary/30 rounded-xl p-8 flex flex-col items-center justify-center gap-2 bg-primary/5 cursor-pointer hover:bg-primary/10 transition-colors relative">
+                    <Upload className="w-8 h-8 text-primary" />
+                    <p className="font-medium">اضغط هنا لرفع صورة الإيصال</p>
+                    <p className="text-sm text-muted-foreground">صورة بصيغة JPG أو PNG</p>
+                    <input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept="image/*" required />
+                  </div>
+                </div>
+
+                <Button type="submit" size="lg" className="w-full text-lg h-14 rounded-xl bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity">
+                  تأكيد الحجز وإرسال الطلب
+                </Button>
+             </form>
           </Card>
         </div>
       </section>
