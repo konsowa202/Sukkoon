@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseServer, useSupabase } from '@/lib/db'
 import { verifyToken, getTokenFromRequest } from '@/lib/jwt'
+import { sendAdminNotification } from '@/lib/email'
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,7 +34,10 @@ export async function POST(request: NextRequest) {
         request_type: request_type || 'easy_book',
         request_message: `${request_message || 'Quick request'}\nPhone: ${phone}`
       })
-      .select()
+      .select(`
+        *,
+        patient:patient_id (name, email)
+      `)
       .single()
 
     if (apptError) {
@@ -55,6 +59,35 @@ export async function POST(request: NextRequest) {
            console.error('Quick request payment error:', paymentError)
            // We don't fail the whole request, but we log it.
        }
+    }
+
+    // Send email notification to Admin
+    try {
+      const patientName = apptData.patient?.name || payload.email || 'مريض';
+      const emailHtml = `
+        <div dir="rtl" style="font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; color: #333;">
+          <h2 style="color: #0b5c5c;">🎉 طلب حجز جديد (فريق سكون)!</h2>
+          <p>أهلاً، لقد وصلك طلب حجز جلسة جديد على منصة سكون.</p>
+          <hr />
+          <ul style="list-style-type: none; padding: 0;">
+            <li><strong>الاسم:</strong> ${patientName}</li>
+            <li><strong>رقم الهاتف:</strong> ${phone || 'غير متوفر'}</li>
+            <li><strong>الخدمة المطلوبة:</strong> ${service || 'استشارة'}</li>
+            <li><strong>النوع:</strong> ${type === 'online' ? 'أونلاين' : 'في العيادة'}</li>
+            <li><strong>المبلغ:</strong> ${amount || 0} ج.م</li>
+            <li><strong>طريقة الدفع:</strong> ${paymentMethod || 'فودافون كاش'}</li>
+          </ul>
+          <p>
+            يرجى الدخول إلى 
+            <a href="https://www.suukoon.com/admin/dashboard" style="color: #0b5c5c; font-weight: bold;">لوحة تحكم الإدارة</a> 
+            لمراجعة إيصال الدفع وتأكيد الحجز.
+          </p>
+        </div>
+      `;
+      // Don't wait for email to finish sending before responding to user
+      sendAdminNotification(`طلب حجز جديد من ${patientName}`, emailHtml).catch(console.error);
+    } catch (e) {
+      console.error('Failed to trigger email', e);
     }
 
     return NextResponse.json(apptData, { status: 201 })

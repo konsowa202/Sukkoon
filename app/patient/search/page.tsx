@@ -138,10 +138,14 @@ export default function GenericBookingPage() {
 
       if(response.ok) {
         toast({
-          title: isAr ? "تم بنجاح" : "Success",
-          description: isAr ? 'تم إرسال طلبك بنجاح! سيتم مراجعته والتواصل معك قريباً.' : 'Your request has been submitted successfully! We will contact you soon.',
+          title: isAr ? "تم إرسال طلبك بنجاح" : "Success",
+          description: isAr ? 'تم الحجز بنجاح، سيتم توجيهك الآن للوحة التحكم لمتابعة حالة الطلب.' : 'Booking successful. Redirecting to your dashboard to track your request.',
         });
         setIsBookingOpen(false);
+        // Redirect to dashboard after a short delay
+        setTimeout(() => {
+          router.push('/patient/dashboard');
+        }, 1500);
       } else {
         const errorData = await response.json();
         toast({
